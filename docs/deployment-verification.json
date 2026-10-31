@@ -1,11 +1,11 @@
 {
   "base_url": "https://audit-platform-ow3x.onrender.com",
-  "checked_at_utc": "2026-10-31T11:37:59Z",
+  "checked_at_utc": "2026-10-31T12:04:25Z",
   "checks": [
     {
       "module": "analytical_review",
       "status": "passed",
-      "zip_bytes": 10958,
+      "zip_bytes": 10954,
       "summary": {
         "comparison_account_count": 2,
         "review_account_count": 2,
@@ -16,7 +16,7 @@
     {
       "module": "jet",
       "status": "passed",
-      "zip_bytes": 11809,
+      "zip_bytes": 11823,
       "summary": {
         "input_row_count": 6,
         "journal_count": 3,
@@ -64,7 +64,7 @@
     {
       "module": "gl_user_split",
       "status": "passed",
-      "zip_bytes": 7963,
+      "zip_bytes": 7970,
       "summary": {
         "input_row_count": 6,
         "exported_row_count": 6,
@@ -76,7 +76,7 @@
     {
       "module": "cash_proofing",
       "status": "passed",
-      "zip_bytes": 9682,
+      "zip_bytes": 9687,
       "summary": {
         "bank_row_count": 5,
         "gl_row_count": 4,
@@ -92,7 +92,7 @@
     {
       "module": "inventory",
       "status": "passed",
-      "zip_bytes": 9505,
+      "zip_bytes": 9500,
       "summary": {
         "item_count": 3,
         "negative_stock_count": 0,
@@ -105,7 +105,7 @@
     {
       "module": "data_cleansing",
       "status": "passed",
-      "zip_bytes": 8657,
+      "zip_bytes": 8669,
       "summary": {
         "row_count": 4,
         "column_count": 5,
@@ -117,7 +117,7 @@
     {
       "module": "quickbooks_preprocessing",
       "status": "passed",
-      "zip_bytes": 6605,
+      "zip_bytes": 6609,
       "summary": {
         "input_report_row_count": 6,
         "transaction_row_count": 2,
@@ -130,7 +130,7 @@
     {
       "module": "ar_confirmation",
       "status": "passed",
-      "zip_bytes": 7779,
+      "zip_bytes": 7787,
       "summary": {
         "ledger_row_count": 6,
         "request_count": 5,
@@ -146,7 +146,7 @@
     {
       "module": "bank_confirmation",
       "status": "passed",
-      "zip_bytes": 8990,
+      "zip_bytes": 8996,
       "summary": {
         "ledger_row_count": 3,
         "request_count": 3,
@@ -159,11 +159,62 @@
         "orphan_reply_count": 0,
         "terms_review_count": 12
       }
+    },
+    {
+      "module": "sap_preprocessing",
+      "status": "passed",
+      "zip_bytes": 14779,
+      "summary": {
+        "status": "draft_requires_review",
+        "company": "3000",
+        "fiscal_year": "2007",
+        "ledger": "0",
+        "record_type": "0",
+        "version": "1",
+        "gl_input_rows": 2,
+        "gl_output_rows": 2,
+        "tb_selected_input_rows": 2,
+        "tb_output_rows": 32,
+        "unmatched_detail_rows": 0,
+        "duplicate_header_rows": 0,
+        "gl_amount_preserved": true,
+        "currency": "USD",
+        "debit_amount": 100.0,
+        "credit_amount": 100.0,
+        "nonbalancing_journal_count": 0,
+        "reconciliation_difference_rows": 0,
+        "effective_date_min": "20070131",
+        "effective_date_max": "20070131",
+        "review_required": [
+          "DMBTR/HWAER가 기능통화 기준인지 확인",
+          "GLT0 HSL이 동일한 통화 기준인지 확인",
+          "회사·사업영역 조합이 감사 단위와 일치하는지 확인",
+          "원장·실적구분·버전 및 달력연도 가정 확인",
+          "Source와 BLART의 의미 대응 및 Source_Listing 확보",
+          "Reversal_Indicator 코드 매핑 미완료",
+          "계정과목표 미확보",
+          "Level 1 미확보 필드와 공란 사유 문서화",
+          "Base Standard의 전체 파일 표현 규칙 미검증"
+        ],
+        "input_row_count": 5,
+        "transaction_row_count": 2,
+        "issue_count": 0
+      }
     }
   ],
   "isolation": "passed",
   "csrf": "passed",
-  "uploads": "blocked",
-  "external_api": "blocked",
-  "logout": "passed"
+  "uploads": "passed",
+  "kyc_key_validation": "passed; live valid-key collection not tested",
+  "logout": "passed",
+  "deployed_commit": "8a8bb1db1143fe849bda04dc921d840cd6f76fd0",
+  "local_python_tests": {
+    "run": 213,
+    "result": "passed"
+  },
+  "frontend_session_tests": {
+    "run": 15,
+    "result": "passed"
+  },
+  "ci_run": "https://github.com/newspring0203/audit-platform/actions/runs/41199187788"
 }
