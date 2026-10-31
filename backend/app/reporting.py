@@ -1,9 +1,10 @@
 """분석 결과의 추적 정보·조서·다운로드 ZIP을 만든다."""
 from pathlib import Path
+import gc
 import hashlib
 import json
 import zipfile
-from audit_data_lab.traceability import attach_traceability, records
+from audit_data_lab.traceability import attach_traceability
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -18,10 +19,24 @@ def write_job_report(spec, result, inputs, *, paper_writer, excel_writer):
     result.metadata['engine_sha256'] = engine.hexdigest()
     manifest = attach_traceability(result, inputs.frames, inputs.sources, run_id=spec['job_id'], parameters=parameters)
     paper_dir = folder / 'report'
-    paper_writer(result, paper_dir, entity='사용자 제출 자료', period='입력 조건 참조', prepared_by='검토자 미지정')
     paper_dir.mkdir(parents=True, exist_ok=True)
-    (paper_dir / 'review_snapshot.json').write_text(json.dumps(manifest, ensure_ascii=False, allow_nan=False))
-    (folder / 'source_rows.json').write_text(json.dumps({slot: records(frame) for slot, frame in inputs.frames.items()}, ensure_ascii=False, allow_nan=False))
+    # Stream JSON instead of holding a second full Unicode copy of every record.
+    with (paper_dir / 'review_snapshot.json').open('w', encoding='utf-8') as output:
+        json.dump(manifest, output, ensure_ascii=False, allow_nan=False)
+    del manifest
+    gc.collect()
+    with (folder / 'source_rows.json').open('w', encoding='utf-8') as output:
+        output.write('{')
+        for index, (slot, frame) in enumerate(inputs.frames.items()):
+            if index: output.write(',')
+            output.write(json.dumps(slot) + ':')
+            frame.to_json(output, orient='records', date_format='iso', force_ascii=False)
+        output.write('}')
+    staging = folder / 'paper_staging'
+    paper_writer(result, staging, entity='사용자 제출 자료', period='입력 조건 참조', prepared_by='검토자 미지정')
+    for file in staging.iterdir():
+        file.rename(paper_dir / file.name)
+    staging.rmdir()
     if spec.get('excel_node') and spec.get('excel_modules'):
         try:
             excel_writer(result, paper_dir / 'review.xlsx', entity='사용자 제출 자료', period='입력 조건 참조', node_executable=spec['excel_node'], artifact_modules=spec['excel_modules'])

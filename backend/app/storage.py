@@ -179,7 +179,8 @@ class PrivateStore:
             if row['expires']<=self.clock():return False
             bundle=self.job_path(row)/'bundle.zip'
             if not bundle.is_file() or bundle.is_symlink():raise ServiceError('REPORT_UNAVAILABLE','결과 파일을 확인할 수 없습니다.',500)
-            aid=uuid.uuid4().hex;digest=hashlib.sha256(bundle.read_bytes()).hexdigest()
+            aid=uuid.uuid4().hex
+            with bundle.open('rb') as source: digest=hashlib.file_digest(source, 'sha256').hexdigest()
             with self.connection() as db:db.execute("UPDATE jobs SET status='completed',artifact=?,artifact_size=?,artifact_sha=? WHERE id=?",(aid,bundle.stat().st_size,digest,job_id))
             self.event('job_completed',job_id)
             return True

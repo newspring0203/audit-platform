@@ -22,7 +22,8 @@ class ReviewFiles:
             if default is not None:
                 return default
             raise ServiceError('REVIEW_NOT_AVAILABLE', '이전 실행에는 검토 화면 데이터가 없습니다. 새 작업으로 실행하세요.', 404)
-        return json.loads(path.read_text())
+        with path.open(encoding='utf-8') as source:
+            return json.load(source)
 
     def snapshot(self, folder):
         snapshot = folder / 'report' / 'review_snapshot.json'
