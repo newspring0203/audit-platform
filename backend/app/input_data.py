@@ -26,10 +26,16 @@ class JobInputs:
         path = folder / 'inputs' / item['stored_name']
         if item.get('sha256') and hashlib.sha256(path.read_bytes()).hexdigest() != item['sha256']:
             fail('SOURCE_HASH_MISMATCH', slot, '업로드 이후 자료가 달라졌습니다. 다시 업로드하세요.', table=module)
+        projection = None
+        if module == 'sap_preprocessing':
+            from .ui_schema import TEMPLATES
+            selected = set(TEMPLATES[module][slot])
+            projection = lambda column: str(column).strip() in selected
+            item = {**item, 'parsed_scope': 'SAP 변환에 사용하는 컬럼만 읽습니다. 업로드 원본은 변경하지 않으며 행 번호는 전체 원본 기준입니다.'}
         if item['suffix'] == '.xlsx':
             with pd.ExcelFile(path) as book:
                 item = {**item, 'sheet': book.sheet_names[0]}
-                frame = pd.read_excel(book, sheet_name=0, dtype=object if raw_report else 'string', header=None if raw_report else 0, nrows=100001)
+                frame = pd.read_excel(book, sheet_name=0, dtype=object if raw_report else 'string', header=None if raw_report else 0, nrows=100001, usecols=projection)
         else:
             raw = path.read_bytes()
             for encoding in ('utf-8-sig', 'cp949'):
@@ -39,7 +45,7 @@ class JobInputs:
                 except UnicodeDecodeError:
                     continue
             separator = '|' if module=='sap_preprocessing' and item['suffix']=='.txt' else ','
-            frame = pd.read_csv(path, sep=separator, dtype='string', encoding=encoding, header=None if raw_report else 0, nrows=100001)
+            frame = pd.read_csv(path, sep=separator, dtype='string', encoding=encoding, header=None if raw_report else 0, nrows=100001, usecols=projection)
         if len(frame) > 100000 or len(frame.columns) > 256:
             fail('DATASET_LIMIT', slot, '행 또는 컬럼 한도를 초과했습니다.', table=module)
         if raw_report:
