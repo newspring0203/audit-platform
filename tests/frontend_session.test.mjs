@@ -19,3 +19,16 @@ test('active requests are aborted on session change',async()=>{let signal;const 
 test('late logout response never changes a newer connection',async()=>{const d=deferred();let revokedToken;const c=new SessionClient({fetchImpl:async(path,o)=>{if(path.endsWith('/logout')){revokedToken=o.headers.get('Authorization');return d.promise;}return ok();}});await c.connect('one');const p=c.logout();await c.connect('two');d.resolve(unauthorized());await assert.rejects(p,SessionCancelled);assert.equal(revokedToken,'Bearer one');assert.equal(c.token,'two');});
 test('failed remote logout reports uncertainty and clears local credentials',async()=>{const c=new SessionClient({fetchImpl:async path=>{if(path.endsWith('/logout'))throw Error('network');return ok();}});await c.connect('one');await assert.rejects(c.logout(),e=>e.message.includes('확인하지 못했습니다'));assert.equal(c.token,'');});
 test('headers and no-store are consistent for all requests',async()=>{let options;const c=new SessionClient({fetchImpl:async(path,o)=>{options=o;return path.endsWith('/features')?ok():new Response(null,{status:204});}});await c.connect('good');await c.request('jobs',{headers:{Authorization:'Bearer wrong','X-Test':'yes'}});assert.equal(options.headers.get('Authorization'),'Bearer good');assert.equal(options.headers.get('X-Test'),'yes');assert.equal(options.cache,'no-store');assert.equal(options.redirect,'error');});
+
+test('demo uses an HttpOnly cookie session without a bearer token',async()=>{
+    const calls=[];const c=new SessionClient({fetchImpl:async(path,options)=>{calls.push({path,options});return ok();}});
+    await c.connectDemo();await c.request('jobs',{method:'POST'});
+    assert.equal(calls[0].path,'/demo/session');assert.equal(calls[0].options.headers['X-Audit-Request'],'1');
+    assert.equal(calls.at(-1).options.headers.get('Authorization'),null);
+    assert.equal(calls.at(-1).options.headers.get('X-Audit-Request'),'1');
+});
+test('disconnect prevents a late demo connection',async()=>{
+    const response=deferred();const c=new SessionClient({fetchImpl:()=>response.promise});
+    const pending=c.connectDemo();c.disconnect();response.resolve(ok());
+    await assert.rejects(pending,SessionCancelled);assert.equal(c.token,'');
+});

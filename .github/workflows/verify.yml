@@ -1,0 +1,24 @@
+name: Verify public demo
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: pip install -r requirements-deploy.txt
+      - run: python scripts/check_publication.py
+      - run: python -m unittest discover -s tests -p 'test_*.py'
+        env:
+          PYTHONWARNINGS: ignore
+      - run: node --test tests/frontend_session.test.mjs
+      - run: docker build -t audit-platform:verify .

@@ -48,6 +48,8 @@ def fixtures():
 class SapToAdsTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        if not NOTEBOOK.is_file():
+            raise unittest.SkipTest('Private learning notebook is not distributed; synthetic SAP API tests still run.')
         notebook=json.loads(NOTEBOOK.read_text())
         cls.sources=[c['source'] if isinstance(c['source'],str) else ''.join(c['source']) for c in notebook['cells'] if c['cell_type']=='code']
 
