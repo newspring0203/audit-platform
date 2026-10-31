@@ -29,7 +29,7 @@ export class SessionClient {
         this._timers.add(timer);return timer;
     }
     clearTimer(timer){clearTimeout(timer);this._timers.delete(timer);}
-    _headers(token,extra){const headers=new Headers(extra);headers.set('Authorization','Bearer '+token);return headers;}
+    _headers(token,extra){const headers=new Headers(extra);if(token!=='cookie-session')headers.set('Authorization','Bearer '+token);headers.set('X-Audit-Request','1');return headers;}
     _path(path){if(typeof path!=='string'||/^(?:[a-z][a-z0-9+.-]*:|\/)/i.test(path))throw new ApiError('API 경로를 확인하세요.');return '/api/'+path;}
     async _error(response,check){
         let data;try{data=await response.json();}catch{}check();
@@ -47,6 +47,21 @@ export class SessionClient {
             const data=await response.json();check();
             if(!Array.isArray(data?.features))throw new ApiError('기능 목록 응답 형식을 확인하세요.');
             this._change(candidate,'connected');return data;
+        }catch(error){check();if(error?.name==='AbortError')throw new SessionCancelled();throw error;}
+        finally{if(this._probe===controller)this._probe=null;}
+    }
+    async connectDemo(){
+        this.disconnect();
+        const controller=new AbortController();this._probe=controller;
+        const attempt=++this._attempt;const check=()=>{if(attempt!==this._attempt)throw new SessionCancelled();};
+        try{
+            const response=await this.fetchImpl('/demo/session',{method:'POST',headers:{'X-Audit-Request':'1'},credentials:'same-origin',cache:'no-store',redirect:'error',signal:controller.signal});check();
+            if(!response.ok)throw await this._error(response,check);
+            const features=await this.fetchImpl(this._path('features'),{credentials:'same-origin',cache:'no-store',redirect:'error',signal:controller.signal});check();
+            if(!features.ok)throw await this._error(features,check);
+            const data=await features.json();check();
+            if(!Array.isArray(data?.features))throw new ApiError('기능 목록을 확인하지 못했습니다.');
+            this._change('cookie-session','connected');return data;
         }catch(error){check();if(error?.name==='AbortError')throw new SessionCancelled();throw error;}
         finally{if(this._probe===controller)this._probe=null;}
     }

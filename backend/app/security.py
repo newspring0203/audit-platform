@@ -3,6 +3,7 @@ from collections import defaultdict, deque
 from fastapi.responses import JSONResponse
 from .http_helpers import NO_STORE
 from .storage import ServiceError
+from .demo import COOKIE
 
 class RateLimiter:
 
@@ -47,11 +48,20 @@ def install_security(app, store, config, clock):
     @app.middleware('http')
     async def security(request, call_next):
         try:
+            if request.url.path == '/demo/session':
+                unauthenticated_limiter.check(('session-global',))
+            cookie_auth = config.mode == 'demo'
+            if cookie_auth and request.method not in {'GET', 'HEAD', 'OPTIONS'}:
+                if request.headers.get('Origin') != config.public_origin or request.headers.get('X-Audit-Request') != '1':
+                    raise ServiceError('INVALID_ORIGIN', '같은 사이트에서 다시 요청하세요.', 403)
             if request.url.path.startswith('/api/'):
                 header = request.headers.get('Authorization', '')
-                if not header.startswith('Bearer '):
-                    raise ServiceError('UNAUTHENTICATED', '인증이 필요합니다.', 401)
-                principal = store.authenticate(header[7:])
+                if cookie_auth:
+                    principal = store.authenticate(request.cookies.get(COOKIE, ''))
+                else:
+                    if not header.startswith('Bearer '):
+                        raise ServiceError('UNAUTHENTICATED', '인증이 필요합니다.', 401)
+                    principal = store.authenticate(header[7:])
                 limiter.check((principal.tenant_id, principal.user_id))
                 request.state.principal = principal
             response = await call_next(request)
@@ -70,4 +80,9 @@ def install_security(app, store, config, clock):
             response = error_response('INTERNAL_ERROR', '요청을 처리하지 못했습니다. 작업 식별자로 담당자에게 확인하세요.', 500)
         for key, value in NO_STORE.items():
             response.headers[key] = value
+        if request.url.path == '/api/logout' and response.status_code == 204 and config.mode == 'demo':
+            response.delete_cookie(COOKIE, path='/', secure=True, httponly=True, samesite='strict')
+        if config.mode != 'local':
+            response.headers['Strict-Transport-Security'] = 'max-age=31536000'
+        response.headers['X-Frame-Options'] = 'DENY'
         return response

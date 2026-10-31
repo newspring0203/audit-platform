@@ -3,6 +3,7 @@ import { SessionClient, SessionCancelled } from './core/session.mjs';
 const $=id=>document.getElementById(id);
 const state={features:[],job:null,review:null,table:'',offset:0,total:0,selected:null,poll:null,generation:0,parametersDirty:false,uploadEditors:new Map(),materials:{}};
 const client=new SessionClient({onSessionChange:reason=>resetSessionUI(reason)});
+let deploymentMode='local',demoModules=[];
 const defaults={quickbooks_preprocessing:{date_format:'%Y-%m-%d'},gl_user_split:{user_column:'Entered_By',max_groups:500},jet:{company:'',fiscal_year:'',combined_rule_min:2},analytical_review:{current_year:'2026',prior_year:'2025',change_threshold_pct:30,tb_period:'12',tb_sign_basis:'debit_positive'},cash_proofing:{date_tolerance_days:0,as_of:'20261231',aging_days:30},inventory:{as_of:'20261231',stale_days:180},data_cleansing:{required_columns:[],date_columns:[],amount_columns:[]},kyc:{company:'',start_date:'20260101',end_date:'20261031',report_type:'A001',with_ai:false}};
 const names={ar_confirmation:'매출채권 조회 회신',bank_confirmation:'금융기관 조회 회신',sap_preprocessing:'SAP 전처리',quickbooks_preprocessing:'QuickBooks 전처리',gl_user_split:'입력 사용자별 GL 분할',jet:'총계정원장 테스트',analytical_review:'분석적 검토',cash_proofing:'자금 대사',inventory:'재고 분석',data_cleansing:'데이터 클렌징',kyc:'KYC 공시'};
 function el(tag,text,cls){const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;}
@@ -15,11 +16,15 @@ function clearResult(){state.generation++;$('summaryCards').replaceChildren();$(
 async function connect(){
     const candidate=$('token').value.trim();if(!candidate)throw Error('접근 토큰을 입력하세요. 이미 연결되어 있으면 바로 기능을 사용하세요.');
     const data=await client.connect(candidate);$('token').value='';state.features=data.features;
+    await applyFeatures(data);
+}
+async function applyFeatures(data){
+    state.features=data.features;
     $('module').replaceChildren(...state.features.map(f=>{const o=el('option',names[f.module]||f.module);o.value=f.module;return o;}));
     renderParameters();renderFeatureNav();$('module').dispatchEvent(new Event('change'));await refreshJobs();$('token').value='';
-    $('connectionStatus').textContent='연결됨 · 토큰은 새로고침 시 사라집니다.';message('');
+    $('connectionStatus').textContent=deploymentMode==='demo'?'방문자 전용 데모 연결됨':'연결됨 · 토큰은 새로고침 시 사라집니다.';message('');
 }
-function showJob(){const j=state.job;$('jobId').value=j.job_id;$('jobStatus').textContent=`${names[j.module]||j.module} · ${statusLabel(j.status)}`;$('expiry').textContent='만료 '+new Date(j.expires_at*1000).toLocaleString();const required=state.features.find(f=>f.module===j.module)?.required_inputs||[];$('run').disabled=j.status!=='created'||required.some(slot=>!j.uploaded_slots.includes(slot))||automaticPending(j.job_id)||automaticProblems(j.job_id);$('download').disabled=!j.artifact;$('export').disabled=j.status!=='completed';}
+function showJob(){const j=state.job;$('jobId').value=j.job_id;$('jobStatus').textContent=`${names[j.module]||j.module} · ${statusLabel(j.status)}`;$('expiry').textContent='만료 '+new Date(j.expires_at*1000).toLocaleString();const required=state.features.find(f=>f.module===j.module)?.required_inputs||[];$('run').disabled=j.status!=='created'||(deploymentMode!=='demo'&&required.some(slot=>!j.uploaded_slots.includes(slot)))||automaticPending(j.job_id)||automaticProblems(j.job_id);$('download').disabled=!j.artifact;$('export').disabled=j.status!=='completed';}
 async function refreshMaterials(){const materialJob=state.job?.job_id;const d=await api(jobPath('/materials'));if(state.job?.job_id!==materialJob)return;if(state.job){state.materials=d.datasets;state.job.uploaded_slots=Object.keys(d.datasets);hydrateUploadContexts(d.datasets);showJob();}const box=$('materials');box.replaceChildren();for(const [slot,m] of Object.entries(d.datasets)){const div=el('div',undefined,'material');div.append(el('strong',`${slot} · ${m.display_name||m.context?.label||'사용자 제출 자료'}`),el('p',`${materialAnalysisLabel(slot)}\n자료 메모 기간: ${m.context?.period_start&&m.context?.period_end?m.context.period_start+' ~ '+m.context.period_end:'미입력 (분석 조건과 별도)'} / 자료 요청 참조(PBC): ${m.context?.pbc_reference||'미입력 (선택)'}`,'muted'),el('p',`버전 ${m.version_id||m.sha256}`,'hash'),el('p',`SHA-256 ${m.sha256}`,'hash'));if(m.history?.length||m.previous_versions?.length)div.append(el('p',`보관된 이전 버전 ${(m.previous_versions||m.history).length}개 · 작업 만료 시 삭제`,'muted'));const versions=m.previous_versions||[];if(versions.length){const select=el('select');for(const v of versions){const o=el('option',`${v.display_name||slot} · ${v.version_id||v.sha256}`);o.value=v.version_id||v.sha256;select.append(o);}const keys=el('input');keys.placeholder='비교 유일 키: 예 Row_ID 또는 회사,연도,전표,행';keys.setAttribute('aria-label',slot+' 버전 비교 키');const compare=el('button','이전 버전과 비교','secondary');compare.addEventListener('click',guarded(async()=>{const d=await api(jobPath(`/materials/${encodeURIComponent(slot)}/compare?prior_version=${encodeURIComponent(select.value)}&keys=${encodeURIComponent(keys.value)}`));state.selected=null;$('trace').replaceChildren();$('source').replaceChildren();$('noteHistory').replaceChildren();$('noteForm').reset();$('results').replaceChildren(el('p',JSON.stringify(d.summary)),el('p',d.policy,'muted'),renderGrid(['kind','key','prior_row','current_row','changed_fields','prior','current'],d.changes.map(r=>({values:Object.fromEntries(Object.entries(r).map(([k,v])=>[k,typeof v==='object'?JSON.stringify(v):v]))}))));$('pageInfo').textContent=`변경 ${d.total}개 중 첫 ${d.changes.length}개 표시`;$('prev').disabled=true;$('next').disabled=true;}));div.append(select,keys,compare);}box.append(div);}if(!box.children.length)box.append(el('p','업로드된 자료가 없습니다.','muted'));}
 let automaticQueue=Promise.resolve();
 const pendingSaves=new Map(),saveProblems=new Map();
@@ -57,6 +62,7 @@ function scheduleContext(editor){
 }
 function hydrateUploadContexts(datasets){for(const [slot,editor] of state.uploadEditors){const asset=datasets[slot];if(!asset)continue;editor.uploaded=true;if(editor.revision===0){const c=asset.context||{};editor.label=c.label||asset.display_name||'';editor.pbc.value=c.pbc_reference||'';editor.start.value=c.period_start||'';editor.end.value=c.period_end||'';editor.status.textContent='저장된 파일: '+(asset.display_name||slot);editor.status.className='uploadStatus saved';}}}
 function uploadForms(){
+    if(deploymentMode==='demo'){$('uploads').replaceChildren(el('p','서버의 합성 샘플이 분석 실행 시 자동 준비됩니다. 파일 업로드는 필요하지 않습니다.'));return;}
     const box=$('uploads');box.replaceChildren();state.uploadEditors.clear();const job=state.job;const feature=state.features.find(f=>f.module===job.module);if(!feature)return;
     if(job.status!=='created'){box.append(el('p','분석 시점 자료가 고정되었습니다.','muted'));return;}
     for(const slot of feature.inputs){
@@ -115,7 +121,7 @@ async function saveBlob(path,name){
     const url=URL.createObjectURL(blob),a=el('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);
 }
 $('connect').addEventListener('click',guarded(connect));$('module').addEventListener('change',()=>{renderParameters();renderFeatureNav();$('pageTitle').textContent=names[$('module').value]||'감사 분석 워크스페이스';});
-$('create').addEventListener('click',guarded(async()=>{client.clearTimer(state.poll);state.job=await api('jobs',json('POST',{module:$('module').value,parameters:readParameters()}));clearResult();showJob();uploadForms();await refreshMaterials();await refreshJobs();showPanel('setup');message('작업을 만들었습니다. 필요한 자료를 업로드하세요.');}));
+$('create').addEventListener('click',guarded(async()=>{client.clearTimer(state.poll);state.job=await api('jobs',json('POST',{module:$('module').value,parameters:deploymentMode==='demo'?{}:readParameters()}));clearResult();showJob();uploadForms();await refreshMaterials();await refreshJobs();showPanel('setup');message(deploymentMode==='demo'?'합성 샘플로 작업을 만들었습니다. 분석 실행을 누르세요.':'작업을 만들었습니다. 필요한 자료를 업로드하세요.');}));
 $('load').addEventListener('click',guarded(loadJob));$('run').addEventListener('click',guarded(async()=>{if(automaticPending(state.job.job_id)||automaticProblems(state.job.job_id))throw Error('파일·자료 정보 저장이 끝난 뒤 분석을 실행하세요.');state.job=await api(jobPath('/run'),{method:'POST'});showJob();uploadForms();await refreshJobs();schedulePoll();message('분석 중입니다. 완료될 때까지 상태를 확인합니다.');}));
 $('table').addEventListener('change',guarded(async()=>{state.table=$('table').value;state.offset=0;await loadTable();}));$('prev').addEventListener('click',guarded(async()=>{state.offset=Math.max(0,state.offset-25);await loadTable();}));$('next').addEventListener('click',guarded(async()=>{state.offset+=25;await loadTable();}));
 $('noteForm').addEventListener('submit',guarded(async()=>{if(!state.selected)throw Error('검토할 결과 행을 선택하세요.');await api(jobPath('/review/notes/'+state.selected),json('PUT',{revision:state.review.review_log.revision,status:$('noteStatus').value,explanation:$('explanation').value,evidence_reference:$('evidence').value,conclusion:$('conclusion').value,reference_ids:Array.from($('referenceIds').selectedOptions,o=>o.value)}));state.review=await api(jobPath('/review'));const current=state.selected;if(current){const note=state.review.review_log.events.filter(e=>e.review_id===current).at(-1);$('noteHistory').append(el('p',`${note.at} · ${note.reviewer} · ${note.status} · ${note.conclusion}`,'history'));}message('검토 이력을 저장했습니다. 최신 검토 이력을 별도로 내려받을 수 있습니다.');}));
@@ -156,7 +162,7 @@ $('parameters').addEventListener('input',()=>{state.parametersDirty=true;});
 $('refreshJobs').addEventListener('click',guarded(refreshJobs));
 
 function showPanel(name){for(const button of document.querySelectorAll('[role=tab][data-panel]')){const active=button.dataset.panel===name;button.setAttribute('aria-selected',String(active));button.tabIndex=active?0:-1;document.getElementById('panel-'+button.dataset.panel).hidden=!active;}}
-function renderFeatureNav(){const nav=$('featureNav');nav.replaceChildren();const groups=[['데이터 준비',['sap_preprocessing','quickbooks_preprocessing','gl_user_split','data_cleansing']],['감사 분석',['ar_confirmation','bank_confirmation','jet','analytical_review','cash_proofing','inventory']],['회사 이해',['kyc']]];const icons={ar_confirmation:'AR',bank_confirmation:'BC',sap_preprocessing:'SAP',quickbooks_preprocessing:'QB',gl_user_split:'↗',data_cleansing:'◇',jet:'JE',analytical_review:'↔',cash_proofing:'₩',inventory:'▦',kyc:'K'};for(const [title,ids] of groups){nav.append(el('p',title,'navGroup'));for(const id of ids){const b=el('button',undefined,'featureButton');b.type='button';b.append(el('span',icons[id],'navIcon'),el('span',names[id]));if($('module').value===id)b.setAttribute('aria-current','page');b.addEventListener('click',guarded(async()=>{if(!state.features.length){message('개발용 연결 설정을 열어 토큰으로 먼저 연결하세요.');document.querySelector('.accessPanel').open=true;return;}client.clearTimer(state.poll);state.job=null;clearResult();for(const key of ['materials','uploads'])$(key).replaceChildren();$('jobStatus').textContent='새 작업을 만들어 시작하세요.';$('run').disabled=true;$('download').disabled=true;$('export').disabled=true;$('module').value=id;$('module').dispatchEvent(new Event('change'));showPanel('setup');message('');}));nav.append(b);}}}
+function renderFeatureNav(){const nav=$('featureNav');nav.replaceChildren();const groups=[['데이터 준비',['sap_preprocessing','quickbooks_preprocessing','gl_user_split','data_cleansing']],['감사 분석',['ar_confirmation','bank_confirmation','jet','analytical_review','cash_proofing','inventory']],['회사 이해',['kyc']]];const icons={ar_confirmation:'AR',bank_confirmation:'BC',sap_preprocessing:'SAP',quickbooks_preprocessing:'QB',gl_user_split:'↗',data_cleansing:'◇',jet:'JE',analytical_review:'↔',cash_proofing:'₩',inventory:'▦',kyc:'K'};for(const [title,ids] of groups){if(deploymentMode==='demo'&&!ids.some(id=>demoModules.includes(id)))continue;nav.append(el('p',title,'navGroup'));for(const id of ids){if(deploymentMode==='demo'&&!demoModules.includes(id))continue;if(state.features.length&&!state.features.some(f=>f.module===id))continue;const b=el('button',undefined,'featureButton');b.type='button';b.append(el('span',icons[id],'navIcon'),el('span',names[id]));if($('module').value===id)b.setAttribute('aria-current','page');b.addEventListener('click',guarded(async()=>{if(!state.features.length){message(deploymentMode==='demo'?'데모 시작을 먼저 누르세요.':'개발용 연결 설정을 열어 토큰으로 먼저 연결하세요.');if(deploymentMode!=='demo')document.querySelector('.accessPanel').open=true;return;}client.clearTimer(state.poll);state.job=null;clearResult();for(const key of ['materials','uploads'])$(key).replaceChildren();$('jobStatus').textContent='새 작업을 만들어 시작하세요.';$('run').disabled=true;$('download').disabled=true;$('export').disabled=true;$('module').value=id;$('module').dispatchEvent(new Event('change'));showPanel('setup');message('');}));nav.append(b);}}}
 for(const button of document.querySelectorAll('[role=tab][data-panel]')){button.addEventListener('click',()=>showPanel(button.dataset.panel));button.addEventListener('keydown',event=>{const tabs=Array.from(document.querySelectorAll('[role=tab][data-panel]'));let index=tabs.indexOf(button);if(event.key==='ArrowRight')index=(index+1)%tabs.length;else if(event.key==='ArrowLeft')index=(index+tabs.length-1)%tabs.length;else if(event.key==='Home')index=0;else if(event.key==='End')index=tabs.length-1;else return;event.preventDefault();showPanel(tabs[index].dataset.panel);tabs[index].focus();});}
 renderFeatureNav();
 
@@ -168,3 +174,33 @@ function materialAnalysisLabel(slot){const p=state.job?.parameters||{};if(state.
  if(slot==='tb')return `TB 분석 조건: ${p.current_year||'미지정'}년·${p.prior_year||'미지정'}년, 각각 ${p.tb_period||'미지정'}기 잔액`;
  if(slot==='account_mapping')return '계정 분류표 · 거래 기간 필터 적용 대상 아님';
 }if(p.as_of)return '분석 기준일: '+String(p.as_of).replace(/^(\d{4})(\d{2})(\d{2})$/,'$1-$2-$3');return '자료 메모 기간은 분석 범위와 별도로 관리합니다.';}
+
+async function startDemo(){
+    $('demoStart').disabled=true;
+    try{
+        const data=await client.connectDemo();
+        await applyFeatures(data);
+        $('module').value='cash_proofing';$('module').dispatchEvent(new Event('change'));
+        $('connectionStatus').textContent='방문자 전용 데모 연결됨';
+        $('demoStatus').textContent='연결되었습니다. 기능을 선택하고 작업 만들기 → 분석 실행 → 조서 ZIP 순서로 체험하세요.';
+        message('자금 대사 샘플이 준비되어 있습니다. 이 조건으로 작업 만들기를 누르세요.');
+    }finally{$('demoStart').disabled=false;}
+}
+$('demoStart').addEventListener('click',guarded(startDemo));
+$('demoLogout').addEventListener('click',guarded(async()=>{await client.logout();$('demoStatus').textContent='데모를 종료했습니다. 기존 세션 접근 권한은 폐기되었습니다.';}));
+async function initializeDeployment(){
+    try{
+        const response=await fetch('/deployment-info',{cache:'no-store'});
+        if(!response.ok)throw Error('서비스 설정을 확인하지 못했습니다.');
+        const info=await response.json();deploymentMode=info.mode;demoModules=info.demo_modules||[];renderFeatureNav();Object.assign(defaults,info.demo_parameters||{});
+        document.querySelector('.pill').textContent=(deploymentMode==='demo'?'PUBLIC DEMO':'LOCAL / PRIVATE')+' · 검토 지원';
+        $('demoPanel').hidden=deploymentMode!=='demo';
+        document.querySelector('.accessPanel').hidden=deploymentMode==='demo';
+        if(deploymentMode==='demo'){
+            document.querySelector('.uploadCard h2').textContent='합성 샘플';document.querySelector('.uploadCard > .muted').textContent='서버가 기능별 합성 자료를 준비합니다. 작업을 만든 뒤 분석 실행을 누르세요.';
+            $('parameterForm').hidden=true;$('parameters').closest('details').hidden=true;
+            $('create').textContent='합성 샘플로 작업 만들기';
+        }
+    }catch(error){message(error.message,true);}
+}
+initializeDeployment();

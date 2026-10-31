@@ -10,6 +10,7 @@ from .job_routes import register_job_routes
 from .jobs import JobManager
 from .lifecycle import create_lifespan
 from .review_routes import register_review_routes
+from .demo import register_demo_routes
 from .security import install_security
 from .storage import PrivateStore
 
@@ -38,6 +39,7 @@ def create_app(config=None, *, clock: Callable = time.time):
     async def small_json(request):
         return await read_small_json(request, config.upload_timeout_seconds)
 
+    register_demo_routes(app, store, config)
     register_job_routes(app, store, manager, config, clock, small_json)
     register_review_routes(app, store, small_json)
     register_frontend_routes(app, ROOT)

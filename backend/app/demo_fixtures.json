@@ -1,0 +1,109 @@
+{
+  "analytical_review": {
+    "parameters": {
+      "current_year": "2026",
+      "prior_year": "2025",
+      "change_threshold_pct": 30,
+      "tb_period": "10",
+      "tb_sign_basis": "debit_positive"
+    },
+    "inputs": {
+      "gl": "v1/gl_comparison.csv",
+      "tb": "v1/tb.csv",
+      "account_mapping": "v1/account_mapping.csv"
+    }
+  },
+  "jet": {
+    "parameters": {
+      "round_unit": 1000,
+      "rare_user_max": 10,
+      "rare_account_max": 3,
+      "combined_rule_min": 2
+    },
+    "inputs": {
+      "gl": "v1/gl_jet.csv",
+      "log": "v1/log_control.csv"
+    }
+  },
+  "gl_user_split": {
+    "parameters": {
+      "user_column": "Entered_By",
+      "max_groups": 500
+    },
+    "inputs": {
+      "gl": "v1/gl_jet.csv"
+    }
+  },
+  "cash_proofing": {
+    "parameters": {
+      "as_of": "20261031",
+      "date_tolerance_days": 2,
+      "aging_days": 5
+    },
+    "inputs": {
+      "bank": "v1/bank.csv",
+      "cash_gl": "v1/cash_gl.csv",
+      "balances": "v1/balances.csv"
+    }
+  },
+  "inventory": {
+    "parameters": {
+      "as_of": "20261031",
+      "stale_days": 180
+    },
+    "inputs": {
+      "movements": "v1/movements.csv",
+      "opening": "v1/opening.csv",
+      "lot_snapshot": "v1/lot_snapshot.csv"
+    }
+  },
+  "data_cleansing": {
+    "parameters": {
+      "required_columns": [
+        "GL_Account_Number",
+        "Effective_Date",
+        "Amount"
+      ],
+      "date_columns": [
+        "Effective_Date"
+      ],
+      "amount_columns": [
+        "Amount"
+      ]
+    },
+    "inputs": {
+      "data": "v1/cleansing_raw.csv",
+      "mapping": "v1/cleansing_mapping.csv"
+    }
+  },
+  "quickbooks_preprocessing": {
+    "parameters": {
+      "date_format": "%Y-%m-%d"
+    },
+    "inputs": {
+      "quickbooks": "v1/quickbooks_report.xlsx"
+    }
+  },
+  "ar_confirmation": {
+    "parameters": {
+      "as_of": "20261031",
+      "amount_tolerance": 0
+    },
+    "inputs": {
+      "ledger": "confirmations/AR_ledger.csv",
+      "requests": "confirmations/AR_requests.csv",
+      "replies": "confirmations/AR_replies.csv"
+    }
+  },
+  "bank_confirmation": {
+    "parameters": {
+      "as_of": "20261031",
+      "amount_tolerance": 0
+    },
+    "inputs": {
+      "ledger": "confirmations/BANK_ledger.csv",
+      "requests": "confirmations/BANK_requests.csv",
+      "replies": "confirmations/BANK_replies.csv"
+    }
+  }
+}
