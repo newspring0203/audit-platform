@@ -54,7 +54,7 @@ class AppConfig:
             max_run_seconds=integer('AUDIT_RUN_TIMEOUT_SECONDS', 120, 600),
             max_workers=integer('AUDIT_ANALYSIS_WORKERS', 1, 4),
             requests_per_minute=integer('AUDIT_REQUESTS_PER_MINUTE', 120, 10000),
-            allow_ai=mode != 'demo' and os.environ.get('AUDIT_ALLOW_AI', 'false').lower() == 'true',
+            allow_ai=os.environ.get('AUDIT_ALLOW_AI', 'false').lower() == 'true',
             excel_node=os.environ.get('AUDIT_XLSX_NODE'), excel_modules=os.environ.get('AUDIT_XLSX_MODULES'),
             mode=mode, public_origin=origin,
             max_demo_sessions=integer('AUDIT_MAX_DEMO_SESSIONS', 100, 1000))

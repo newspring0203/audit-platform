@@ -1,0 +1,2 @@
+BUKRS (Company Code),GJAHR (Fiscal Year),BELNR (Accounting Document Number),BKTXT (Document Header Text),BLART (Document Type),BUDAT (Posting Date in the Document),BLDAT (Document Date in Document),CPUDT (Day On Which Accounting Document Was Entered),CPUTM (Time of Entry),MONAT (Fiscal Period),USNAM (User name),HWAER (Local Currency)
+3000,2007,000001,현금 매출,SA,20070131,20070130,20070201,090005,01,tester,USD

@@ -12,9 +12,9 @@ from backend.app.input_data import JobInputs
 from backend.app.reporting import write_job_report
 
 
-def run(spec):
+def run(spec, *, dart_api_key=None):
     inputs = JobInputs(spec)
-    context = AnalysisContext(spec, inputs)
+    context = AnalysisContext(spec, inputs, dart_api_key=dart_api_key)
     result = execute_analysis(
         context.module,
         lambda: run_analysis(context),
@@ -29,7 +29,7 @@ def run(spec):
 
 if __name__ == "__main__":
     try:
-        run(json.loads(Path(sys.argv[1]).read_text()))
+        run(json.loads(Path(sys.argv[1]).read_text()), dart_api_key=sys.stdin.read(41) or None)
     except Exception:
         # 원본·키·상세 예외를 프로세스 출력에 남기지 않는다.
         raise SystemExit(2)

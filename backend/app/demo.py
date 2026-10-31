@@ -1,20 +1,18 @@
-"""Anonymous, isolated portfolio sessions using server-owned synthetic fixtures only."""
-import json, secrets
-from pathlib import Path
+"""Anonymous, isolated visitor sessions; analysis inputs are supplied by the user."""
+import secrets
 from fastapi import Request
 from fastapi.responses import JSONResponse
-from .config import ROOT
+from .contracts import MODULES
 from .http_helpers import NO_STORE
 from .storage import ServiceError
 
 COOKIE = '__Host-audit_demo'
-FIXTURES = json.loads((Path(__file__).with_name('demo_fixtures.json')).read_text())
 
 def register_demo_routes(app, store, config):
     @app.get('/deployment-info')
     async def deployment_info():
-        return {'mode': config.mode, 'demo_modules': list(FIXTURES) if config.mode == 'demo' else [],
-                'demo_parameters': {name: fixture['parameters'] for name, fixture in FIXTURES.items()} if config.mode == 'demo' else {},
+        return {'mode': config.mode, 'demo_modules': list(MODULES) if config.mode == 'demo' else [],
+                'input_policy': 'user_upload',
                 'session_seconds': 3600, 'job_ttl_seconds': config.storage.job_ttl_seconds}
 
     @app.post('/demo/session')

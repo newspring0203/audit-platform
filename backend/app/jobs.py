@@ -11,12 +11,12 @@ class JobManager:
         self.pool=ThreadPoolExecutor(max_workers=max_workers,thread_name_prefix='audit-job')
         self.lock=threading.RLock();self.processes={};self.futures={};self.closing=False
 
-    def start(self,job_id,principal):
+    def start(self,job_id,principal,*,dart_api_key=None):
         with self.lock:
             row=self.store.owned(job_id,principal)
             if row['status']!='created':raise ServiceError('JOB_BUSY','이미 처리 중이거나 완료된 작업입니다.',409)
             self.store.update_status(job_id,'queued')
-            self.futures[job_id]=self.pool.submit(self._execute,job_id)
+            self.futures[job_id]=self.pool.submit(self._execute,job_id,dart_api_key=dart_api_key)
         return self.store.owned(job_id,principal)
 
     @staticmethod
@@ -36,7 +36,7 @@ class JobManager:
             z.writestr('review/processing_issue.json',json.dumps(payload,ensure_ascii=False,indent=2))
         os.chmod(folder/'bundle.zip',0o600)
 
-    def _execute(self,job_id):
+    def _execute(self,job_id,*,dart_api_key=None):
         process=None
         try:
             with self.lock:
@@ -54,13 +54,21 @@ class JobManager:
                 env={k:v for k,v in os.environ.items() if k in allowed}
                 if row['module']=='kyc':
                     for key in ['DART_API_KEY','OPENAI_MODEL']:
-                        if key in os.environ:env[key]=os.environ[key]
+                        if key in os.environ and (key != 'DART_API_KEY' or dart_api_key is None):env[key]=os.environ[key]
                     if self.allow_ai and json.loads(row['params']).get('with_ai') and 'OPENAI_API_KEY' in os.environ:
                         env['OPENAI_API_KEY']=os.environ['OPENAI_API_KEY']
                 env.update({'PYTHONDONTWRITEBYTECODE':'1','PYTHONNOUSERSITE':'1','TMPDIR':str(temp),'TMP':str(temp),'TEMP':str(temp)})
                 process=subprocess.Popen([sys.executable,str(Path(__file__).with_name('worker.py')),str(folder/'spec.json')],
-                    stdin=subprocess.DEVNULL,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,
+                    stdin=subprocess.PIPE if dart_api_key else subprocess.DEVNULL,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,
                     start_new_session=True,env=env,umask=0o077)
+                # Visitor credentials never enter spec.json, SQLite, argv, or child environment.
+                # A private anonymous pipe delivers the key to this job's worker only.
+                if dart_api_key:
+                    try:
+                        process.stdin.write(dart_api_key.encode('ascii'))
+                        process.stdin.close()
+                    finally:
+                        dart_api_key = None
                 self.processes[job_id]=process
                 deadline=min(self.max_run_seconds,max(0.1,row['expires']-self.store.clock()))
             timed_out=False
@@ -83,6 +91,7 @@ class JobManager:
                         self.store.finalize(job_id)
                 except Exception:pass
         finally:
+            dart_api_key = None
             with self.lock:self.processes.pop(job_id,None);self.futures.pop(job_id,None)
 
     def delete(self,job_id,principal=None):

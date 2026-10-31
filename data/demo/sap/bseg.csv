@@ -1,0 +1,3 @@
+BUKRS (Company Code),GJAHR (Fiscal Year),BELNR (Accounting Document Number),GSBER (Business Area),SGTXT (Item Text),BUZEI (Number of Line Item Within Accounting Document),HKONT (General Ledger Account),DMBTR (Amount in Local Currency),SHKZG (Debit/Credit Indicator)
+3000,2007,000001,0001,판매,001,0100,100.00,S
+3000,2007,000001,0001,판매,002,0400,100.00,H

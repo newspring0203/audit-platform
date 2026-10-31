@@ -4,8 +4,7 @@ import csv
 import hashlib
 import io
 import json
-from .demo import FIXTURES
-from .config import ROOT
+import re
 from urllib.parse import unquote
 from fastapi import Request
 from fastapi.responses import Response, StreamingResponse
@@ -23,7 +22,7 @@ def register_job_routes(app, store, manager, config, clock, small_json):
 
     @app.get('/api/features')
     async def features():
-        return {'features': [{'module': name, 'inputs': value['inputs'], 'required_inputs': value['required_inputs'], 'optional_inputs': value['optional_inputs'], 'parameters': sorted(value['parameters']), 'ui': module_ui()[name], 'input_columns': TEMPLATES.get(name, {})} for name, value in MODULES.items() if config.mode != 'demo' or name in FIXTURES], 'downloads': '기능별 검토 결과 ZIP; CSV·JSON·Markdown 포함, 서버 렌더러 설정 시 Excel 포함', 'cache_policy': {'customer_data': 'no-store', 'public_disclosures': 'not_enabled'}}
+        return {'features': [{'module': name, 'inputs': value['inputs'], 'required_inputs': value['required_inputs'], 'optional_inputs': value['optional_inputs'], 'parameters': sorted(value['parameters']), 'ui': module_ui()[name], 'input_columns': TEMPLATES.get(name, {})} for name, value in MODULES.items()], 'downloads': '기능별 검토 결과 ZIP; CSV·JSON·Markdown 포함, 서버 렌더러 설정 시 Excel 포함', 'cache_policy': {'customer_data': 'no-store', 'public_disclosures': 'not_enabled'}}
 
     @app.get('/api/jobs')
     async def list_jobs(request: Request):
@@ -48,11 +47,6 @@ def register_job_routes(app, store, manager, config, clock, small_json):
             spec = NewJob.model_validate(payload).checked()
         except ValidationError:
             raise ServiceError('INVALID_JOB_REQUEST', '기능·조건 형식을 확인하세요. 소유자나 API 키는 요청으로 지정할 수 없습니다.', 422) from None
-        if config.mode == 'demo':
-            if spec.module not in FIXTURES:
-                raise ServiceError('DEMO_MODULE_DISABLED', '이 기능은 로컬 환경에서 사용할 수 있습니다.', 403)
-            # Demo conditions are reproducible and cannot invoke external services.
-            spec = NewJob(module=spec.module, parameters=FIXTURES[spec.module]['parameters'])
         await asyncio.to_thread(manager.cleanup)
         return public_job(store.create_job(request.state.principal, spec.module, spec.parameters))
 
@@ -62,8 +56,6 @@ def register_job_routes(app, store, manager, config, clock, small_json):
 
     @app.put('/api/jobs/{job_id}/inputs/{slot}')
     async def upload(job_id: str, slot: str, request: Request):
-        if config.mode == 'demo':
-            raise ServiceError('DEMO_UPLOAD_DISABLED', '공개 데모는 합성 샘플 자료만 사용합니다.', 403)
         principal = request.state.principal
         row = store.owned(job_id, principal)
         if slot not in MODULES[row['module']]['inputs']:
@@ -101,23 +93,19 @@ def register_job_routes(app, store, manager, config, clock, small_json):
 
     @app.post('/api/jobs/{job_id}/run', status_code=202)
     async def start_job(job_id: str, request: Request):
-        if config.mode == 'demo':
-            row = store.owned(job_id, request.state.principal)
-            if row['status'] == 'created' and not json.loads(row['inputs']):
-                fixture = FIXTURES[row['module']]
-                for slot, name in fixture['inputs'].items():
-                    source = ROOT / 'data' / 'demo' / name
-                    data = source.read_bytes()
-                    part, file, _, _ = store.begin_upload(job_id, request.state.principal, slot, source.suffix)
-                    try:
-                        with file:
-                            file.write(data)
-                        store.commit_upload(job_id, request.state.principal, slot, source.suffix, part, len(data), hashlib.sha256(data).hexdigest(), display_name=source.name)
-                    except BaseException:
-                        file.close()
-                        store.abort_upload(job_id, part)
-                        raise
-        return public_job(manager.start(job_id, request.state.principal))
+        row = store.owned(job_id, request.state.principal)
+        dart_api_key = None
+        if request.headers.get('content-type', '').startswith('application/json'):
+            payload = await small_json(request)
+            if not isinstance(payload, dict) or set(payload) - {'dart_api_key'}:
+                raise ServiceError('INVALID_RUN_REQUEST', '실행 요청 형식을 확인하세요.', 422)
+            dart_api_key = payload.get('dart_api_key')
+        if dart_api_key is not None:
+            if row['module'] != 'kyc' or not isinstance(dart_api_key, str) or not re.fullmatch(r'[A-Za-z0-9]{40}', dart_api_key):
+                raise ServiceError('INVALID_DART_KEY', '40자리 OpenDART 인증키를 확인하세요.', 422)
+        if row['module'] == 'kyc' and config.mode == 'demo' and not dart_api_key:
+            raise ServiceError('DART_KEY_REQUIRED', '본인이 발급받은 OpenDART 인증키를 입력하세요.', 422)
+        return public_job(manager.start(job_id, request.state.principal, dart_api_key=dart_api_key))
 
     @app.get('/api/jobs/{job_id}/downloads/{artifact_id}')
     async def download(job_id: str, artifact_id: str, request: Request):

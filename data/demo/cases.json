@@ -105,5 +105,19 @@
       "requests": "confirmations/BANK_requests.csv",
       "replies": "confirmations/BANK_replies.csv"
     }
+  },
+  "sap_preprocessing": {
+    "parameters": {
+      "company": "3000",
+      "fiscal_year": "2007",
+      "ledger": "0",
+      "record_type": "0",
+      "version": "1"
+    },
+    "inputs": {
+      "bseg": "sap/bseg.csv",
+      "bkpf": "sap/bkpf.csv",
+      "glt0": "sap/glt0.csv"
+    }
   }
 }

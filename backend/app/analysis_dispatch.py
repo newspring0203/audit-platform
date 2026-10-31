@@ -9,7 +9,8 @@ from audit_data_lab.common import fail
 
 
 class AnalysisContext:
-    def __init__(self, spec, inputs):
+    def __init__(self, spec, inputs, *, dart_api_key=None):
+        self.dart_api_key = dart_api_key
         self.spec = spec
         self.inputs = inputs
         self.parameters = spec["parameters"]
@@ -112,12 +113,17 @@ def kyc(context):
     if context.parameters.get("with_ai") and not context.spec.get("allow_ai"):
         fail("AI_DISABLED", "with_ai", "서버에서 AI 호출이 비활성화되어 있습니다.", table="KYC")
     from audit_data_lab.kyc_live import run_live_kyc
+    from audit_data_lab.kyc_settings import KycSettings
+    settings = KycSettings.from_env()
+    if context.dart_api_key is not None:
+        settings = KycSettings(context.dart_api_key, settings.openai_api_key, settings.model)
     return run_live_kyc(
         str(context.required("company")),
         start_date=str(context.required("start_date")),
         end_date=str(context.required("end_date")),
         max_reports=context.number("max_reports", 1, 1, 5, integer=True),
         with_ai=bool(context.parameters.get("with_ai", False)),
+        settings=settings,
         archive_dir=Path(context.spec["directory"]) / "public_sources",
         report_type=context.parameters.get("report_type", "A001"),
     )
