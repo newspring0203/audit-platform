@@ -1,0 +1,169 @@
+{
+  "base_url": "https://audit-platform-ow3x.onrender.com",
+  "checked_at_utc": "2026-10-31T11:37:59Z",
+  "checks": [
+    {
+      "module": "analytical_review",
+      "status": "passed",
+      "zip_bytes": 10958,
+      "summary": {
+        "comparison_account_count": 2,
+        "review_account_count": 2,
+        "period_coverage_status": "observed_periods_equal",
+        "ratio_status": "calculated_draft"
+      }
+    },
+    {
+      "module": "jet",
+      "status": "passed",
+      "zip_bytes": 11809,
+      "summary": {
+        "input_row_count": 6,
+        "journal_count": 3,
+        "complex_condition_journal_count": 3,
+        "flagged_row_count": 6,
+        "flagged_journal_count": 3,
+        "rule_hit_count": 22,
+        "log_amount_reconciliation_status": "basis_information_missing",
+        "log_population_status": "basis_information_missing",
+        "log_population_difference_count": null,
+        "log_control_exception_count": null,
+        "sequence_gap_count": 0,
+        "rules": {
+          "UNBALANCED_JOURNAL": {
+            "row_count": 0,
+            "journal_count": 0
+          },
+          "REPEATED_ACCOUNT_AMOUNT": {
+            "row_count": 0,
+            "journal_count": 0
+          },
+          "ROUND_AMOUNT": {
+            "row_count": 6,
+            "journal_count": 3
+          },
+          "WEEKEND_ENTRY": {
+            "row_count": 2,
+            "journal_count": 1
+          },
+          "NIGHT_ENTRY": {
+            "row_count": 2,
+            "journal_count": 1
+          },
+          "RARE_USER": {
+            "row_count": 6,
+            "journal_count": 3
+          },
+          "RARE_ACCOUNT": {
+            "row_count": 6,
+            "journal_count": 3
+          }
+        }
+      }
+    },
+    {
+      "module": "gl_user_split",
+      "status": "passed",
+      "zip_bytes": 7963,
+      "summary": {
+        "input_row_count": 6,
+        "exported_row_count": 6,
+        "user_group_count": 3,
+        "output_file_count": 3,
+        "missing_user_row_count": 0
+      }
+    },
+    {
+      "module": "cash_proofing",
+      "status": "passed",
+      "zip_bytes": 9682,
+      "summary": {
+        "bank_row_count": 5,
+        "gl_row_count": 4,
+        "matched_count": 2,
+        "timing_match_count": 1,
+        "unmatched_bank_count": 3,
+        "unmatched_gl_count": 2,
+        "ambiguous_candidate_count": 2,
+        "candidate_limit_group_count": 0,
+        "balance_reconciliation_status": "arithmetic_match"
+      }
+    },
+    {
+      "module": "inventory",
+      "status": "passed",
+      "zip_bytes": 9505,
+      "summary": {
+        "item_count": 3,
+        "negative_stock_count": 0,
+        "stale_candidate_count": 1,
+        "no_outflow_positive_stock_count": 1,
+        "negative_movement_event_count": 1,
+        "lot_aging_status": "ready"
+      }
+    },
+    {
+      "module": "data_cleansing",
+      "status": "passed",
+      "zip_bytes": 8657,
+      "summary": {
+        "row_count": 4,
+        "column_count": 5,
+        "issue_count": 7,
+        "duplicate_row_count": 2,
+        "mapping_status": "column_names_mapped"
+      }
+    },
+    {
+      "module": "quickbooks_preprocessing",
+      "status": "passed",
+      "zip_bytes": 6605,
+      "summary": {
+        "input_report_row_count": 6,
+        "transaction_row_count": 2,
+        "review_row_count": 0,
+        "excluded_nontransaction_row_count": 4,
+        "conversion_status": "completed_flattening",
+        "ads_status": "not_converted"
+      }
+    },
+    {
+      "module": "ar_confirmation",
+      "status": "passed",
+      "zip_bytes": 7779,
+      "summary": {
+        "ledger_row_count": 6,
+        "request_count": 5,
+        "reply_count": 4,
+        "matched_count": 1,
+        "review_row_count": 5,
+        "no_reply_count": 1,
+        "not_requested_count": 1,
+        "difference_count": 1,
+        "orphan_reply_count": 0
+      }
+    },
+    {
+      "module": "bank_confirmation",
+      "status": "passed",
+      "zip_bytes": 8990,
+      "summary": {
+        "ledger_row_count": 3,
+        "request_count": 3,
+        "reply_count": 2,
+        "matched_count": 1,
+        "review_row_count": 2,
+        "no_reply_count": 1,
+        "not_requested_count": 0,
+        "difference_count": 1,
+        "orphan_reply_count": 0,
+        "terms_review_count": 12
+      }
+    }
+  ],
+  "isolation": "passed",
+  "csrf": "passed",
+  "uploads": "blocked",
+  "external_api": "blocked",
+  "logout": "passed"
+}

@@ -43,3 +43,24 @@ GitHub Actions에서도 보안 경로 검사·Python/브라우저 세션 테스�
 `.env`, `.runtime`, 토큰 파일, 원본/가공 실자료, outputs, 노트북, 사적 증거 자료는 Git 및 Docker에서 제외한다. `check_publication.py`는 Git 추적 파일의 금지 경로·일반 키 패턴·XLSX 내부 키 패턴을 검사한다. 이는 임의의 모든 개인정보를 자동 판별하는 검사는 아니므로, 데이터 파일은 검토한 합성 자료 폴더만 명시적으로 추가한다.
 
 원래 로컬 키와 토큰 값의 포함 여부는 공개 이력 전체를 별도로 대조하며 값 자체는 출력하지 않는다. 배포 후 실제 URL과 검증 결과를 README 및 `docs/portfolio/links.json`에 반영한다.
+
+## 이번 공개 배포
+
+- 서비스: https://audit-platform-ow3x.onrender.com
+- Render 무료 Docker Web Service, Singapore 지역, 단일 인스턴스.
+- GitHub 공개 저장소 URL로 연결했으며 추가 저장소 접근 권한은 부여하지 않았다.
+- 설정된 환경변수는 AUDIT_MODE=demo이며 외부 API 키는 등록하지 않았다.
+- 최초 배포 코드: 96cc85624e718d2af7a1d5c1c9d049f6ec4da05e. 이후 README 제거 커밋은 실행 코드에 영향을 주지 않는다.
+- 공개 저장소 직접 연결 방식에서 변경 반영 여부는 Render의 배포 커밋을 확인한다. 필요하면 Manual Deploy → Deploy latest commit으로 반영한다.
+- README는 사용자가 직접 작성하기로 하여 공개 저장소에서 제거했다. 배포 주소는 이 문서와 links.json에 기록한다.
+
+## 검증 결과 (2026-10-31)
+
+- Python 181개 검사 실행: 성공, 비공개 노트북 대조 2개 건너뜀.
+- JavaScript 세션 검사 15개 성공.
+- GitHub Actions의 동일 검사 및 Docker 이미지 빌드 성공: https://github.com/newspring0203/audit-platform/actions/runs/41197318381
+- 공개 Git 추적 파일 금지 경로·키 패턴 검사 통과. 업로드 전 188개 Git 이력 blob과 실제 로컬 키·토큰 값 2개를 대조해 일치 0건 확인. 비밀 값은 출력하지 않았다.
+- 실제 공개 HTTPS 서버에서 분석 9종 실행·조서 ZIP 무결성·다른 방문자 작업/다운로드 404·CSRF 403·파일 업로드 403·KYC 차단·로그아웃 후 401 확인.
+- 공개 분석 결과 요약과 ZIP 크기: [deployment-verification.json](deployment-verification.json).
+
+검증은 합성 자료와 현재 코드 범위에 대한 기능·보안 경계 확인이며, 모든 취약점 부재를 보증하는 외부 보안 감사는 아니다.
