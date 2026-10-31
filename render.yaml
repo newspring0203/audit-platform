@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: audit-platform
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: AUDIT_MODE
+        value: demo
+      - key: AUDIT_RUNTIME_ROOT
+        value: /tmp/audit-platform
+      - key: AUDIT_JOB_TTL_SECONDS
+        value: "3600"
+      - key: AUDIT_MAX_JOBS_TOTAL
+        value: "20"
+      - key: AUDIT_ANALYSIS_WORKERS
+        value: "1"

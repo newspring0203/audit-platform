@@ -1,0 +1,17 @@
+**
+!Dockerfile
+!requirements-deploy.txt
+!backend/
+!backend/**
+!src/
+!src/**
+!frontend/
+!frontend/**
+!scripts/
+!scripts/run_server.py
+!data/
+!data/demo/
+!data/demo/**
+**/__pycache__
+**/*.pyc
+**/.DS_Store
