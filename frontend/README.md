@@ -2,7 +2,7 @@
 
 **회계 자료를 업로드하고, 분석 결과에서 원본과 검토 조서까지 확인하는 웹 워크스페이스입니다.**
 
-**Audit Analytics** 화면을 HTML · CSS · JavaScript로 구현하고 FastAPI에 연결했습니다.
+**Audit Support Platform** 화면을 HTML · CSS · JavaScript로 구현하고 FastAPI에 연결했습니다.
 
 [**웹에서 사용하기 ↗**](https://audit-platform-ow3x.onrender.com/) · [Backend](../backend/README.md) · [화면 설계](../docs/review_workspace.md)
 

@@ -127,7 +127,7 @@ async function saveBlob(path,name){
     const blob=await client.request(path,{},'blob');const epoch=client.epoch;client.assertCurrent(epoch);
     const url=URL.createObjectURL(blob),a=el('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);
 }
-$('connect').addEventListener('click',guarded(connect));$('module').addEventListener('change',()=>{renderParameters();renderFeatureNav();$('pageTitle').textContent=names[$('module').value]||'Audit Analytics';});
+$('connect').addEventListener('click',guarded(connect));$('module').addEventListener('change',()=>{renderParameters();renderFeatureNav();$('pageTitle').textContent=names[$('module').value]||'Audit Support Platform';});
 $('create').addEventListener('click',guarded(async()=>{client.clearTimer(state.poll);state.job=await api('jobs',json('POST',{module:$('module').value,parameters:readParameters()}));clearResult();showJob();uploadForms();await refreshMaterials();await refreshJobs();showPanel('setup');message('작업을 만들었습니다. 필요한 자료를 업로드하세요.');}));
 $('load').addEventListener('click',guarded(loadJob));$('run').addEventListener('click',guarded(async()=>{if(automaticPending(state.job.job_id)||automaticProblems(state.job.job_id))throw Error('파일·자료 정보 저장이 끝난 뒤 분석을 실행하세요.');const keyInput=$('dartKey');let credentials=keyInput?.value.trim();
     if(state.job.module==='kyc'&&deploymentMode==='demo'&&!/^[A-Za-z0-9]{40}$/.test(credentials||''))throw Error('본인이 발급받은 40자리 OpenDART 인증키를 입력하세요.');
@@ -164,7 +164,7 @@ function renderChart(rows){const box=$('chart');box.replaceChildren();const cand
 function resetSessionUI(reason='disconnected'){
     showPanel('setup');state.job=null;clearResult();state.features=[];
     for(const id of ['materials','uploads','jobsList','module','parameterForm'])$(id).replaceChildren();
-    $('jobId').value='';$('jobStatus').textContent='새 작업을 만들어 시작하세요.';$('pageTitle').textContent='Audit Analytics';$('moduleHelp').textContent='';$('moduleDetails').hidden=true;
+    $('jobId').value='';$('jobStatus').textContent='새 작업을 만들어 시작하세요.';$('pageTitle').textContent='Audit Support Platform';$('moduleHelp').textContent='';$('moduleDetails').hidden=true;
     $('create').disabled=true;$('run').disabled=true;$('download').disabled=true;$('export').disabled=true;
     automaticQueue=Promise.resolve();pendingSaves.clear();saveProblems.clear();
     const labels={connected:'연결 확인됨',logout:'로그아웃됨',unauthenticated:'서버에서 인증을 확인하지 못했습니다. 토큰을 확인하고 다시 연결하세요.',disconnected:'연결되지 않았습니다.'};
