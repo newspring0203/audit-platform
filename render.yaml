@@ -15,3 +15,5 @@ services:
         value: "20"
       - key: AUDIT_ANALYSIS_WORKERS
         value: "1"
+      - key: AUDIT_RUN_TIMEOUT_SECONDS
+        value: "600"
