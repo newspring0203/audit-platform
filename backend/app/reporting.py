@@ -23,6 +23,8 @@ def write_job_report(spec, result, inputs, *, paper_writer, excel_writer):
     # Stream JSON instead of holding a second full Unicode copy of every record.
     with (paper_dir / 'review_snapshot.json').open('w', encoding='utf-8') as output:
         json.dump(manifest, output, ensure_ascii=False, allow_nan=False)
+    from .review_index import write_index
+    write_index(folder, manifest, inputs.frames)
     del manifest
     gc.collect()
     with (folder / 'source_rows.json').open('w', encoding='utf-8') as output:

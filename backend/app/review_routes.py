@@ -94,7 +94,7 @@ def register_review_routes(app, store, small_json):
         return {'columns': data['columns'], 'row_count': data['row_count'], 'rows': data['rows'][offset:offset + limit]}
 
     @app.get('/api/jobs/{job_id}/review/trace/{review_id}')
-    async def trace(job_id: str, review_id: str, request: Request):
+    def trace(job_id: str, review_id: str, request: Request):
         _, folder = files.owned(job_id, request, True)
         data = files.snapshot(folder)
         entry = data['trace'].get(review_id)
@@ -103,7 +103,7 @@ def register_review_routes(app, store, small_json):
         return entry | {'datasets': data['datasets']}
 
     @app.get('/api/jobs/{job_id}/review/sources/{slot}')
-    async def source_rows(job_id: str, slot: str, request: Request, offset: int=0, limit: int=25, review_id: str=''):
+    def source_rows(job_id: str, slot: str, request: Request, offset: int=0, limit: int=25, review_id: str=''):
         if offset < 0 or not 1 <= limit <= 100:
             raise ServiceError('INVALID_PAGE', '페이지 범위를 확인하세요.', 422)
         _, folder = files.owned(job_id, request, True)
@@ -114,6 +114,9 @@ def register_review_routes(app, store, small_json):
         if entry is None:
             raise ServiceError('RECORD_NOT_FOUND', '출처를 확인할 결과 행을 지정하세요.', 404)
         rows = sorted({n for ref in entry['sources'] if ref['slot'] == slot for n in ref['rows']})
+        if (folder / 'review_index.sqlite').exists():
+            from .review_index import read_one
+            return {'total': len(rows), 'rows': [{'source_row': n, 'values': read_one(folder, 'source', slot, n-data['datasets'][slot].get('first_data_row', 2))} for n in rows[offset:offset+limit]], 'dataset': data['datasets'][slot]}
         sources = files.load(folder / 'source_rows.json')
         return {'total': len(rows), 'rows': [{'source_row': n, 'values': sources[slot][n - data['datasets'][slot].get('first_data_row', 2)]} for n in rows[offset:offset + limit]], 'dataset': data['datasets'][slot]}
 

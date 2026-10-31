@@ -26,6 +26,9 @@ class ReviewFiles:
             return json.load(source)
 
     def snapshot(self, folder):
+        if (folder / 'review_index.sqlite').exists():
+            from .review_index import snapshot
+            return snapshot(folder)
         snapshot = folder / 'report' / 'review_snapshot.json'
         if not snapshot.exists() and (folder / 'bundle.zip').exists():
             with zipfile.ZipFile(folder / 'bundle.zip') as bundle:
