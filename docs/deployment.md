@@ -6,7 +6,7 @@
 - demo: `scripts/run_server.py`, 방문자별 무작위 세션, HttpOnly·Secure·SameSite=Strict·__Host- 쿠키. 토큰 값은 JSON이나 프론트엔드 JavaScript에 전달하지 않는다.
 - private: HTTPS 원점을 명시하는 운영자 발급 Bearer 토큰. 기업용 사용자 관리·SSO는 별도 구현 대상.
 - 상태 변경 요청은 정확한 Origin과 `X-Audit-Request: 1`을 모두 검사한다. CORS를 열지 않는다.
-- demo의 업로드 API·SAP·KYC를 차단하고 서버 소유 합성 샘플과 고정 조건만 실행한다. API 키를 데모에 등록하지 않는다.
+- 공개 환경도 SAP·KYC를 포함한 전체 기능, 사용자 파일 업로드와 분석 조건 입력을 제공한다. 자동 예제 주입은 하지 않는다. KYC 인증키는 방문자가 실행할 때 입력하며 서버 파일·로그·결과에 저장하지 않는다. [현재 백엔드 정책](../backend/README.md)을 참고한다.
 - 사용자별 작업 접근 검사, 세션 만료·폐기, 요청 수·세션 수·작업 수·분석 시간 제한을 적용한다. 익명 공개 데모는 공격 방어용 서비스가 아니며 대규모 사용에는 별도 WAF/인증이 필요하다.
 
 ## 파일 정책
@@ -34,7 +34,7 @@ python scripts/check_publication.py
 python scripts/smoke_demo.py https://실제로-발급된-서비스-주소
 ```
 
-마지막 명령은 실제 서버에서 9개 분석 실행·조서 ZIP 무결성·다른 방문자의 접근 차단·로그아웃·업로드 및 외부 API 차단을 확인한다. HTTPS URL은 발급된 주소로 교체한다. 코드에 가상의 배포 성공이나 URL을 기록하지 않는다.
+마지막 명령은 가상 예제 파일을 직접 업로드하여 10개 파일 분석·조서 ZIP 무결성·다른 방문자의 접근 차단·로그아웃·방문자 OpenDART 키 입력 검증을 확인한다. HTTPS URL은 발급된 주소로 교체한다. 코드에 가상의 배포 성공이나 URL을 기록하지 않는다.
 
 GitHub Actions에서도 보안 경로 검사·Python/브라우저 세션 테스트·Docker 빌드를 실행한다. 로컬 Docker Desktop이 꺼져 있으면 이미지 빌드는 Docker 실행 후 또는 CI/Render에서 검증해야 한다.
 
@@ -49,12 +49,12 @@ GitHub Actions에서도 보안 경로 검사·Python/브라우저 세션 테스�
 - 서비스: https://audit-platform-ow3x.onrender.com
 - Render 무료 Docker Web Service, Singapore 지역, 단일 인스턴스.
 - GitHub 공개 저장소 URL로 연결했으며 추가 저장소 접근 권한은 부여하지 않았다.
-- 설정된 환경변수는 AUDIT_MODE=demo이며 외부 API 키는 등록하지 않았다.
+- 설정된 환경변수는 AUDIT_MODE=demo이며 운영자 소유 외부 API 키는 등록하지 않았다. OpenDART는 방문자 본인의 키를 입력받는다.
 - 최초 배포 코드: 96cc85624e718d2af7a1d5c1c9d049f6ec4da05e. 이후 README 제거 커밋은 실행 코드에 영향을 주지 않는다.
 - 공개 저장소 직접 연결 방식에서 변경 반영 여부는 Render의 배포 커밋을 확인한다. 필요하면 Manual Deploy → Deploy latest commit으로 반영한다.
 - README는 사용자가 직접 작성하기로 하여 공개 저장소에서 제거했다. 배포 주소는 이 문서와 links.json에 기록한다.
 
-## 검증 결과 (2026-10-31)
+## 초기 제한형 데모 검증 기록 (이후 사용자 업로드 방식으로 대체)
 
 - Python 181개 검사 실행: 성공, 비공개 노트북 대조 2개 건너뜀.
 - JavaScript 세션 검사 15개 성공.
@@ -64,3 +64,7 @@ GitHub Actions에서도 보안 경로 검사·Python/브라우저 세션 테스�
 - 공개 분석 결과 요약과 ZIP 크기: [deployment-verification.json](deployment-verification.json).
 
 검증은 합성 자료와 현재 코드 범위에 대한 기능·보안 경계 확인이며, 모든 취약점 부재를 보증하는 외부 보안 감사는 아니다.
+
+## 현재 배포 범위
+
+사용자 업로드·분석 조건·SAP·KYC 메뉴를 복원했다. 초기 고정 자료 체험 방식의 아래 차단 검증은 과거 기록이며 현재 동작을 뜻하지 않는다. 현재 API·키 처리·파일 정책은 frontend/README.md와 backend/README.md에 정리한다. 루트 README는 게시하지 않는다.

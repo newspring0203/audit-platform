@@ -1,221 +1,84 @@
-# Audit Platform — Backend
+# Audit Platform · Backend
 
-회계감사 데이터 분석을 위한 **Python·FastAPI 기반 백엔드 서버**입니다.
+사용자가 업로드한 감사 자료를 작업별로 격리해 분석하고, 결과와 원본 연결 및 검토 조서를 제공하는 Python·FastAPI 서버입니다.
 
-사용자가 업로드한 회계 데이터를 작업별로 관리하고, Python 분석 엔진을 실행한 뒤 분석 결과와 원본 근거를 조회할 수 있도록 구현하였습니다.
+**[배포 사이트](https://audit-platform-ow3x.onrender.com/)** · [화면 이용법](../frontend/README.md) · [배포 상세](../docs/deployment.md)
 
-**자료의 소유권 관리, 분석 실행 이력, 원본 추적, 검토 기록 및 감사조서 출력**을 지원합니다.
+## 기능과 실행 환경
 
-## 1. 주요 기능
+SAP·QuickBooks 전처리, GL 분할, 데이터 클렌징, JET, 분석적 검토, 자금 대사, 재고 분석, 조회 회신 비교 및 OpenDART 공시 수집을 제공합니다. 공개 환경에서도 사용자 입력 조건과 업로드 파일을 그대로 검증·분석하며 고정된 예제를 강제로 주입하지 않습니다.
 
-| 기능           | 설명                                               |
-| -------------- | -------------------------------------------------- |
-| 작업 관리      | 사용자별 분석 작업 생성, 상태 조회 및 만료 처리    |
-| 자료 업로드    | GL·TB 등 분석 입력 자료의 업로드 및 검증           |
-| 분석 실행      | Python 분석 엔진 호출 및 작업 실행 상태 관리       |
-| 결과 조회      | 분석 결과, 계산 조건, 원본 행 및 검토 대상 조회    |
-| 원본 추적      | 업로드 자료와 분석 결과 간의 연결 정보 관리        |
-| 검토 기록      | 검토 의견, 기준서 참조 및 검토 이력 보관           |
-| 감사조서 생성  | 분석 결과를 CSV·JSON·Markdown·ZIP으로 제공         |
-| 접근 제어      | Bearer 토큰 인증 및 회사·사용자·작업별 소유권 검사 |
-| 임시 자료 관리 | 작업 만료, 파일 삭제 및 정리 작업 수행             |
+| 환경 | 인증 | 실행 |
+|---|---|---|
+| 로컬 `local` | 운영자 발급 개발용 Bearer 토큰 | `python scripts/run_local.py` |
+| 공개 `demo` | 방문자별 HttpOnly·Secure·SameSite=Strict 쿠키 | `python scripts/run_server.py` |
+| 비공개 `private` | 운영자 발급 Bearer 토큰 | `python scripts/run_server.py` |
 
-Excel 렌더러가 서버에 설정되어 Excel 출력을 지원합니다.
+공개 모드는 인증 방식의 차이이며 기능을 예제로 제한하는 모드가 아닙니다. 계정·SSO·역할별 기업 권한 관리는 별도 범위입니다. 현재 Render 무료 Docker 웹 서비스는 Singapore 지역 단일 인스턴스로 실행합니다. ASGI worker는 1개여야 하며 분석 자식 프로세스 수만 별도로 제한합니다.
 
-## 2. 시스템 구조
+## API 흐름
 
-### 2.1 전체 처리 흐름
+| 메서드 | 경로 | 용도 |
+|---|---|---|
+| GET | `/health` | 서버 상태 |
+| GET | `/deployment-info` | 환경과 전체 기능 목록 |
+| POST | `/demo/session` | 공개 방문자 세션 발급 |
+| GET | `/api/features` | 기능·입력 자료·분석 조건 정의 |
+| POST | `/api/jobs` | 사용자 조건으로 작업 생성 |
+| PUT | `/api/jobs/{job_id}/inputs/{slot}` | 원본 바이트 업로드. `X-Filename` 필수 |
+| POST | `/api/jobs/{job_id}/run` | 분석 실행. KYC는 별도 키 본문 사용 |
+| GET | `/api/jobs/{job_id}` | 진행 상태·결과 식별자 |
+| GET | `/api/jobs/{job_id}/review` | 결과와 검토 정보 |
+| GET | `/api/jobs/{job_id}/downloads/{artifact_id}` | 인증·소유권 확인 후 ZIP 제공 |
+| DELETE | `/api/jobs/{job_id}` | 작업 중지 및 자료 삭제 |
+| POST | `/api/logout` | 세션 폐기 |
 
-**Frontend → FastAPI → 작업·권한 검증 → Python 분석 엔진 → 결과 저장 → 원본 추적 및 검토 → 감사조서 출력**
+공개 환경의 상태 변경 요청에는 정확한 `Origin`과 `X-Audit-Request: 1`이 필요합니다. 인증 쿠키는 서버가 발급하고 토큰 값을 JSON으로 전달하지 않습니다. 다른 방문자의 작업·업로드·다운로드에는 접근할 수 없습니다.
 
-프론트엔드, API 서버, 분석 엔진의 역할을 분리하여 구성하였습니다.
+일반 파일 분석은 작업 생성 → 자료 업로드 → 실행 순서입니다. 작업 생성 시 받은 `parameters`를 저장하며 API 키를 이 객체에 넣을 수 없습니다. 작업 상태 `completed`만으로 계산 성공을 판단하지 않고 결과의 `metadata.execution_status` 및 미실행 사유를 확인해야 합니다.
 
-| 구성 요소              | 역할                                                  |
-| ---------------------- | ----------------------------------------------------- |
-| Frontend               | 분석 조건 입력, 자료 업로드, 결과 및 원본 조회        |
-| FastAPI Backend        | 인증, 작업 관리, 입력 검증, 분석 실행 및 결과 제공    |
-| Python Analysis Engine | SAP 전처리, JET, 분석적 검토, 자금 대사, 재고 분석 등 |
-| Reporting              | 분석 결과와 검토 정보를 파일로 출력                   |
+## 방문자 OpenDART 키 처리
 
-### 2.2 주요 코드 구조
+KYC 작업의 실행 요청은 `POST /api/jobs/{job_id}/run`에 JSON 객체 `{ "dart_api_key": "본인이 발급받은 인증키" }`를 전달합니다. 실제 키를 예제 코드·명령줄·GitHub 이슈에 넣지 않습니다.
 
-| 파일                       | 역할                             |
-| -------------------------- | -------------------------------- |
-| `app/main.py`              | FastAPI 애플리케이션 생성        |
-| `app/job_routes.py`        | 분석 작업 생성·조회·실행 API     |
-| `app/uploads.py`           | 자료 업로드 및 입력 처리         |
-| `app/worker.py`            | 분석 작업 실행 관리              |
-| `app/analysis_dispatch.py` | 기능별 Python 분석 함수 호출     |
-| `app/reporting.py`         | 분석 결과 및 감사조서 출력       |
-| `app/manage.py`            | 개발 토큰 발급 및 임시 자료 정리 |
+- 본인 작업 소유권을 먼저 확인하고, 요청 크기와 키 형식을 검사합니다.
+- 공개 환경에서는 방문자 키를 명시적으로 요구합니다. 다른 방문자의 키나 운영자의 로컬 키로 대신 실행하지 않습니다.
+- 키를 SQLite·작업 조건·spec.json·서버 파일·로그·결과 조서에 저장하지 않습니다.
+- 분석 worker에는 명령줄 인자나 환경변수가 아닌 익명 표준입력 파이프로 전달합니다. 해당 작업에서만 메모리로 사용합니다.
+- OpenDART의 고정 HTTPS API로만 전송하고 외부 리다이렉트를 따르지 않습니다. 키가 포함된 공급자 요청 URL과 상세 HTTP 예외를 로그·보고서에 남기지 않습니다.
+- 브라우저 입력란은 실행 요청 시 비우며 브라우저 영구 저장소에 저장하지 않습니다. 입력 후 실행 전까지는 해당 화면 메모리에 존재합니다.
 
-실제 분석 함수는 `src/audit_data_lab/`에 별도로 구성되어 있습니다.
+이는 서버가 키를 전혀 보지 않는 구조가 아닙니다. HTTPS 종단과 분석 프로세스가 요청·실행 중 키를 일시적으로 처리하며, Python 메모리의 물리적 완전 소거를 보증하지 않습니다. 서버가 중단되면 키를 복구하지 않으므로 새 작업에서 다시 입력해야 합니다. 로컬 환경은 별도 `.env` 방식도 유지합니다.
 
-백엔드는 사용자의 요청과 Python 분석 엔진을 연결하며, 인증과 작업 상태, 결과 제공을 담당합니다.
+OpenDART의 키 유효성·요청 한도·네트워크 오류는 실제 조회 결과로 확인해야 합니다. 유효 키를 사용한 실제 공시 수집 성공을 모의 검증만으로 주장하지 않습니다. 선택적 AI 요약은 `AUDIT_ALLOW_AI=true` 및 서버의 OpenAI 설정이 별도로 필요하며 기본 비활성화입니다.
 
-## 3. API 설계
+## 파일과 출력 정책
 
-모든 `/api` 경로에는 Bearer 토큰 인증이 필요합니다.
+CSV·TXT·XLSX만 허용하며, 파일당 기본 20 MiB·작업 입력 합계 80 MiB를 제한합니다. XLSX 구조·압축 해제 용량·매크로·외부 링크·DTD/엔티티를 검사합니다. 원본과 결과는 웹 정적 경로가 아닌 전용 임시 저장소에 보관합니다.
 
-### 3.1 주요 API
+기본 작업 TTL은 생성 후 3600초입니다. 만료 시 즉시 접근을 차단하고, 서버 실행 중 30초 간격 및 서버 시작 시 정리합니다. 방문자당 활성 작업은 기본 3개, 전체 20개이며 요청 수·동시 분석 수·실행 시간도 제한합니다. 무료 Render의 휴면·재시작·재배포 시 파일과 세션이 먼저 사라질 수 있습니다.
 
-| Method | Endpoint                                     | 기능                        |
-| ------ | -------------------------------------------- | --------------------------- |
-| GET    | `/api/features`                              | 분석 기능 및 입력 조건 조회 |
-| POST   | `/api/jobs`                                  | 분석 작업 생성              |
-| PUT    | `/api/jobs/{job_id}/inputs/{input_name}`     | 분석 자료 업로드            |
-| POST   | `/api/jobs/{job_id}/run`                     | 분석 실행                   |
-| GET    | `/api/jobs/{job_id}`                         | 작업 상태 및 결과 정보 조회 |
-| GET    | `/api/jobs/{job_id}/downloads/{artifact_id}` | 결과 ZIP 다운로드           |
-| DELETE | `/api/jobs/{job_id}`                         | 작업 중지 및 자료 삭제      |
-| POST   | `/api/logout`                                | 접근 토큰 폐기              |
+조서 ZIP은 CSV·JSON·Markdown과 검토 스냅샷을 포함합니다. XLSX 조서는 별도의 Node/Excel 렌더러를 설정한 환경에서만 생성되며 현재 기본 배포 이미지에는 포함하지 않습니다. 다운로드한 파일은 사용자 측에서 관리합니다.
 
-### 3.2 분석 실행 예시 — JET
+## 로컬 실행과 배포
 
-**① 분석 작업 생성**
+```bash
+python3.12 -m venv .venv
+.venv/bin/python -m pip install -r requirements-deploy.txt
+.venv/bin/python scripts/run_local.py
+```
 
-`POST /api/jobs`
+배포는 `Dockerfile`과 `scripts/run_server.py`를 사용합니다. `PORT`를 받아 `0.0.0.0`에서 실행하며 `AUDIT_MODE=demo`, HTTPS `AUDIT_PUBLIC_ORIGIN` 또는 Render의 `RENDER_EXTERNAL_URL`, 전용 `AUDIT_RUNTIME_ROOT`가 필요합니다. 프로젝트 `.env`는 로컬에서만 읽고 저장소나 이미지에 포함하지 않습니다.
 
-요청 본문 예시:
+GitHub Actions는 공개 파일 검사·Python 테스트·JavaScript 세션 테스트·Docker 빌드를 실행합니다. Render의 정책 값은 `After CI Checks Pass`이지만, 현재 **공개 저장소 URL 직접 연결 방식에서는 자동 배포가 지원되지 않으므로 CI 성공 확인 후 수동 배포**합니다. 완전한 자동 배포에는 Git provider 연결이 필요합니다. [Render 공식 안내](https://render.com/docs/deploys#automatic-deploys)
 
-`{"module":"jet","parameters":{"company":"3000","fiscal_year":"2007"}}`
+## 검증
 
-**② 분석 입력 자료 업로드**
+```bash
+.venv/bin/python -m unittest discover -s tests -p 'test_*.py'
+node --test tests/frontend_session.test.mjs
+.venv/bin/python scripts/check_publication.py
+.venv/bin/python scripts/smoke_demo.py https://audit-platform-ow3x.onrender.com
+```
 
-`PUT /api/jobs/{job_id}/inputs/gl`
-
-`PUT /api/jobs/{job_id}/inputs/log`
-
-원본 파일 바이트와 `X-Filename` 헤더를 전달합니다.
-
-**③ 분석 실행 및 상태 확인**
-
-`POST /api/jobs/{job_id}/run`
-
-`GET /api/jobs/{job_id}`
-
-**④ 결과 다운로드**
-
-`GET /api/jobs/{job_id}/downloads/{artifact_id}`
-
-다운로드 요청 시에도 인증, 작업 소유권 및 만료 여부를 확인합니다.
-
-**작업 상태 `completed`는 계산 처리가 종료되었다는 의미입니다.**
-
-입력 부족 등으로 검사를 수행하지 못한 경우에는 미실행 사유와 후속 확인 사항을 결과에 기록합니다.
-
-## 4. 회계 데이터 보호 및 접근 제어
-
-회계 데이터의 기밀성과 분석 결과의 추적 가능성을 고려하여 접근 제어, 파일 검증, 임시 저장 정책을 구현하였습니다.
-
-### 4.1 접근 제어
-
-- 회사·사용자·작업별로 자료와 결과를 분리합니다.
-- 토큰에서 확인한 회사·사용자 정보를 기준으로 작업 소유권을 검증합니다.
-- 동일 회사의 다른 사용자도 기본적으로 타인의 작업에 접근할 수 없습니다.
-- 요청 본문이나 `X-User-ID`를 통한 소유자 변경을 허용하지 않습니다.
-- 토큰 원문 대신 해시를 서버에 저장하고, 만료 및 로그아웃 시 폐기합니다.
-
-### 4.2 파일 업로드 및 저장 정책
-
-| 항목             | 개발 환경 기본 정책               |
-| ---------------- | --------------------------------- |
-| 단일 업로드 파일 | 최대 20MB                         |
-| 작업당 전체 입력 | 최대 80MB                         |
-| 압축 해제 크기   | 최대 128MB                        |
-| 데이터 크기      | 최대 100,000행·256열              |
-| 텍스트 인코딩    | UTF-8·CP949                       |
-| 디렉터리 권한    | `0700`                            |
-| 파일 권한        | `0600`                            |
-| 저장 파일명      | 원본 파일명 대신 UUID 사용        |
-| 파일 검사        | 매크로·암호화 XLSX·외부 링크 거절 |
-
-작업별 비공개 폴더를 사용하며, 업로드 파일을 정적 웹 경로로 직접 노출하지 않습니다.
-
-### 4.3 작업 및 자원 관리
-
-| 항목                  | 개발 환경 기본값 |
-| --------------------- | ---------------- |
-| 사용자당 유효 작업    | 최대 3개         |
-| 전체 작업             | 최대 50개        |
-| 동시 실행             | 최대 2개         |
-| 분석 실행 제한        | 120초            |
-| 작업 만료             | 생성 후 1시간    |
-| 자동 정리 주기        | 30초             |
-| 최소 보안 이벤트 보관 | 기본 24시간      |
-
-작업 만료 시 접근을 거절하고 실행 프로세스 및 관련 임시 파일을 정리합니다.
-
-작업 자료, 보고서, 미리보기 및 검토 이력은 작업별 저장 범위에서 함께 관리합니다.
-
-## 5. 분석 결과 및 감사 추적성
-
-분석 결과를 **어떤 입력 자료와 계산 조건으로 결과가 생성되었는지 확인할 수 있도록** 구성하였습니다.
-
-**입력 자료 → 실행 조건 → Python 계산 → 분석 결과 → 원본 연결 → 검토 기록 → 감사조서**
-
-주요 관리 정보는 다음과 같습니다.
-
-- 업로드 원본의 SHA-256 해시와 자료 버전
-- 분석 실행 조건 및 코드 해시
-- 분석 결과와 연결된 원본 행 또는 집계 입력 범위
-- 검토 의견, 증빙 참조 및 변경 이력
-- 분석 실행 시점의 결과와 후속 검토 기록
-
-감사조서는 분석 실행 시점의 결과를 제공하며, 이후 수정된 최신 검토 이력은 별도로 관리합니다.
-
-원본 추적은 업로드된 자료부터 시작하며, ERP 최초 추출 과정 전체의 완전성을 입증하지 않습니다.
-
-상세한 추적 방식과 구현 범위는 [감사 분석 결과의 출처 추적 및 검토 관리 설계](../docs/review_workspace.md)를 참고하세요.
-
-## 6. 로컬 실행 및 검증
-
-프로젝트 루트에서 개발용 접근 토큰을 발급한 뒤 FastAPI 서버를 실행합니다.
-
-**토큰 발급**
-
-`.venv/bin/python -m backend.app.manage --root .runtime issue-token --tenant demo-company --user reviewer --token-file .runtime/reviewer.token`
-
-**서버 실행**
-
-`.venv/bin/python -m uvicorn backend.app.main:create_app --factory --host 127.0.0.1 --port 8000 --workers 1 --no-access-log`
-
-서버 시작 후 `http://127.0.0.1:8000/`에서 웹 화면을 사용할 수 있습니다.
-
-자세한 실행 환경과 전체 검증 방법은 프로젝트 루트 README 및 관련 문서를 참고하세요.
-
-## 7. 현재 구현 범위와 한계
-
-현재 백엔드는 **단일 호스트·단일 ASGI 프로세스 기반의 MVP**입니다.
-
-다음 항목은 공개 배포 또는 실제 운영 환경 적용 전에 별도 검토가 필요합니다.
-
-- 운영용 인증 및 계정 관리(SSO/OIDC 등)
-- 조직 단위 권한 관리
-- HTTPS·TLS 및 리버스 프록시 구성
-- 저장소 암호화와 키 관리
-- 컨테이너 및 분석 프로세스의 자원 격리
-- 장애 발생 시 외부 정리 작업 및 모니터링
-- 백업, 자료 보존 및 삭제 정책
-
-API 및 다운로드 응답에 `Cache-Control: private, no-store`를 적용하지만 이미 다운로드된 파일의 회수를 보장하지는 않습니다.
-
-OS 파일 삭제는 SSD 또는 백업 매체에서의 완전한 보안 소거를 보장하지 않습니다.
-
-AI 기능은 서버에서 기본 비활성화되어 있으며, 실제 외부 AI 호출 성공 여부는 별도의 검증 과제입니다.
-
-## 8. 상세 문서 및 참고 자료
-
-### 프로젝트 문서
-
-- [감사 분석 결과의 출처 추적 및 검토 관리 설계](../docs/review_workspace.md)
-- [백엔드 보안 검증 기록](../docs/backend_security_verification.md)
-- [캐시 및 데이터 보존 정책](../docs/cache_and_retention.md)
-- [전체 프로젝트 소개](../README.md)
-
-### 공식 기술 참고 자료
-
-- [OWASP Authorization Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html)
-- [OWASP File Upload Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html)
-- [MDN Cache-Control](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cache-Control)
-- [FastAPI Lifespan Events](https://fastapi.tiangolo.com/advanced/events/)
+공개 저장소에는 비공개 학습 노트북이 없으므로 노트북 대조 검사는 건너뜁니다. 합성 SAP 업로드·분석 검사는 별도로 실행합니다. 실제 서버 smoke 검사는 가상 예제 파일을 직접 업로드해 파일 분석 10종과 다른 방문자의 접근 차단, 키 입력 검증, 다운로드 ZIP 무결성을 확인합니다. 운영 데이터나 실제 인증키를 테스트 자료로 커밋하지 않습니다.
