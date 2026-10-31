@@ -20,7 +20,8 @@ async function connect(){
 }
 async function applyFeatures(data){
     state.features=data.features;
-    $('module').replaceChildren(...state.features.map(f=>{const o=el('option',names[f.module]||f.module);o.value=f.module;return o;}));
+    const placeholder=el('option','분석 기능을 선택하세요.');placeholder.value='';
+    $('module').replaceChildren(placeholder,...state.features.map(f=>{const o=el('option',names[f.module]||f.module);o.value=f.module;return o;}));
     renderParameters();renderFeatureNav();$('module').dispatchEvent(new Event('change'));await refreshJobs();$('token').value='';
     $('connectionStatus').textContent=deploymentMode==='demo'?'방문자 전용 데모 연결됨':'연결됨 · 토큰은 새로고침 시 사라집니다.';message('');
 }
@@ -142,7 +143,8 @@ $('logout').addEventListener('click',guarded(async()=>{await client.logout();mes
 
 function statusLabel(status){return ({created:'자료 준비',uploading:'업로드 중',queued:'실행 대기',running:'분석 중',completed:'결과 확인'})[status]||status;}
 function renderParameters(){
-    state.parametersDirty=false;const feature=state.features.find(f=>f.module===$('module').value);const form=$('parameterForm');form.replaceChildren();$('moduleHelp').textContent=feature?.ui?.description||'';const info={ar_confirmation:'ledger: 거래처별 잔액. requests: 항목별 요청 ID와 조회 대상. replies: 받은 회신 정리표. 상태는 confirmed·disputed·partial·unable이며 미회신은 회신 행을 만들지 않는다. Request_ID별 회신은 1건만 제출한다. 빈 회신도 헤더가 있는 CSV로 제출한다.',bank_confirmation:'ledger·requests·replies 서식으로 입력한다. Item_Type은 deposit·loan 등 자료 간 동일한 코드를 사용한다. 한 금융기관 회신에 여러 항목이 있으면 내부 Request_ID를 항목별로 부여한다. 담보·보증·제한 등의 공란은 없음으로 판단하지 않는다.',sap_preprocessing:'BSEG·GLT0: XLSX 또는 CSV. BKPF: 파이프(|) 구분 TXT 또는 CSV/XLSX. 첫 시트·첫 행 헤더를 읽습니다. 필요한 컬럼은 각 업로드의 서식에서 확인하세요. 결과 ZIP의 gl.csv·tb.csv를 후속 분석에 업로드할 수 있습니다.',quickbooks_preprocessing:'앞 5개 계정 표시 열과 Type·Date·Num·Name·Memo·Split·Amount·Balance의 예제 형식을 지원합니다. 첫 시트만 읽습니다. 통화·전표 키·입력 사용자 등이 확인되지 않아 ADS GL로 자동 변환하지 않습니다.',data_cleansing:'컬럼명 변경과 값의 의미 변환은 다릅니다. 예를 들어 SAP S/H를 ADS D/C로 바꾸거나 통화를 정하는 것은 별도 변환이 필요합니다. 오류가 있는 행은 임의로 삭제하지 않습니다.',jet:'log 입력은 웹 접속 로그가 아니라 GL과 비교할 별도 회계 거래 기록입니다. 금액·통화·추출 범위가 같은지 확인해야 합니다. 현재 웹에서는 근거 승인 기능이 없어 로그 대사를 미실행으로 표시하며 GL 규칙 검사는 수행합니다.'};$('moduleDetails').hidden=!info[$('module').value];$('moduleDetailsText').textContent=info[$('module').value]||'';
+    $('create').disabled=!state.features.some(f=>f.module===$('module').value);
+    state.parametersDirty=false;const feature=state.features.find(f=>f.module===$('module').value);const form=$('parameterForm');form.replaceChildren();$('moduleHelp').textContent=feature?.ui?.description||'왼쪽 메뉴에서 사용할 기능을 선택하세요.';const info={ar_confirmation:'ledger: 거래처별 잔액. requests: 항목별 요청 ID와 조회 대상. replies: 받은 회신 정리표. 상태는 confirmed·disputed·partial·unable이며 미회신은 회신 행을 만들지 않는다. Request_ID별 회신은 1건만 제출한다. 빈 회신도 헤더가 있는 CSV로 제출한다.',bank_confirmation:'ledger·requests·replies 서식으로 입력한다. Item_Type은 deposit·loan 등 자료 간 동일한 코드를 사용한다. 한 금융기관 회신에 여러 항목이 있으면 내부 Request_ID를 항목별로 부여한다. 담보·보증·제한 등의 공란은 없음으로 판단하지 않는다.',sap_preprocessing:'BSEG·GLT0: XLSX 또는 CSV. BKPF: 파이프(|) 구분 TXT 또는 CSV/XLSX. 첫 시트·첫 행 헤더를 읽습니다. 필요한 컬럼은 각 업로드의 서식에서 확인하세요. 결과 ZIP의 gl.csv·tb.csv를 후속 분석에 업로드할 수 있습니다.',quickbooks_preprocessing:'앞 5개 계정 표시 열과 Type·Date·Num·Name·Memo·Split·Amount·Balance의 예제 형식을 지원합니다. 첫 시트만 읽습니다. 통화·전표 키·입력 사용자 등이 확인되지 않아 ADS GL로 자동 변환하지 않습니다.',data_cleansing:'컬럼명 변경과 값의 의미 변환은 다릅니다. 예를 들어 SAP S/H를 ADS D/C로 바꾸거나 통화를 정하는 것은 별도 변환이 필요합니다. 오류가 있는 행은 임의로 삭제하지 않습니다.',jet:'log 입력은 웹 접속 로그가 아니라 GL과 비교할 별도 회계 거래 기록입니다. 금액·통화·추출 범위가 같은지 확인해야 합니다. 현재 웹에서는 근거 승인 기능이 없어 로그 대사를 미실행으로 표시하며 GL 규칙 검사는 수행합니다.'};$('moduleDetails').hidden=!info[$('module').value];$('moduleDetailsText').textContent=info[$('module').value]||'';
     for(const f of feature?.ui?.fields||[]){const label=el('label',f.label);let input;
         if(f.kind==='select'){input=el('select');for(const [value,text] of f.options){const option=el('option',text);option.value=value;input.append(option);}}
         else{input=el('input');input.type=f.kind==='checkbox'?'checkbox':f.kind==='date'?'date':['number','decimal','year'].includes(f.kind)?'number':'text';if(['number','decimal'].includes(f.kind)){input.min=f.min;input.max=f.max;input.step=f.kind==='decimal'?'any':'1';}if(f.kind==='year'){input.min=1000;input.max=9999;input.step=1;}if(f.kind==='list')input.placeholder='예: Date, Amount';}
@@ -163,7 +165,7 @@ function resetSessionUI(reason='disconnected'){
     showPanel('setup');state.job=null;clearResult();state.features=[];
     for(const id of ['materials','uploads','jobsList','module','parameterForm'])$(id).replaceChildren();
     $('jobId').value='';$('jobStatus').textContent='새 작업을 만들어 시작하세요.';$('pageTitle').textContent='Audit Analytics Workspace';$('moduleHelp').textContent='';$('moduleDetails').hidden=true;
-    $('run').disabled=true;$('download').disabled=true;$('export').disabled=true;
+    $('create').disabled=true;$('run').disabled=true;$('download').disabled=true;$('export').disabled=true;
     automaticQueue=Promise.resolve();pendingSaves.clear();saveProblems.clear();
     const labels={connected:'연결 확인됨',logout:'로그아웃됨',unauthenticated:'서버에서 인증을 확인하지 못했습니다. 토큰을 확인하고 다시 연결하세요.',disconnected:'연결되지 않았습니다.'};
     $('connectionStatus').textContent=labels[reason]||labels.disconnected;renderFeatureNav();
@@ -190,7 +192,6 @@ async function startDemo(){
     try{
         const data=await client.connectDemo();
         await applyFeatures(data);
-        $('module').value='cash_proofing';$('module').dispatchEvent(new Event('change'));
         $('connectionStatus').textContent='방문자 전용 데모 연결됨';
         $('demoStatus').textContent='연결되었습니다. 기능 선택 → 분석 조건 설정 → 자료 업로드 → 분석 실행 → 검토 조서 다운로드 순서로 진행하세요.';
         message('기능을 선택하고 분석 조건을 설정한 뒤 작업을 만들어 자료를 업로드하세요.');
