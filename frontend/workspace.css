@@ -19,3 +19,12 @@ input,select,textarea{min-width:0;max-width:100%;box-sizing:border-box}select:no
 .uploadStatus{font-size:11px;line-height:1.7;color:#728271;margin:10px 0 0}.uploadStatus.saved{color:#286340}.uploadStatus.error{color:#a24435}
 
 .material>.muted{white-space:pre-line}.upload>label{margin-top:12px}
+
+/* Public demo introduction and always-visible usage notice. */
+#demoPanel h2{margin-bottom:10px;font-size:22px;line-height:1.4}
+#demoPanel .demoIntro{margin:0 0 18px;line-height:1.7}
+.demoActions{display:flex;flex-wrap:wrap;gap:8px}
+.demoNotice{margin-top:20px;padding-top:16px;border-top:1px solid #dce3dd;color:#64756b}
+.demoNotice h3{margin:0 0 6px;font-size:12px;font-weight:600}
+.demoNotice p{margin:0;font-size:12px;line-height:1.8;overflow-wrap:anywhere}
+#demoStatus{margin:14px 0 0;font-size:12px;line-height:1.7;color:#64756b}

@@ -62,7 +62,7 @@ function scheduleContext(editor){
 }
 function hydrateUploadContexts(datasets){for(const [slot,editor] of state.uploadEditors){const asset=datasets[slot];if(!asset)continue;editor.uploaded=true;if(editor.revision===0){const c=asset.context||{};editor.label=c.label||asset.display_name||'';editor.pbc.value=c.pbc_reference||'';editor.start.value=c.period_start||'';editor.end.value=c.period_end||'';editor.status.textContent='저장된 파일: '+(asset.display_name||slot);editor.status.className='uploadStatus saved';}}}
 function uploadForms(){
-    if(deploymentMode==='demo'){$('uploads').replaceChildren(el('p','서버의 합성 샘플이 분석 실행 시 자동 준비됩니다. 파일 업로드는 필요하지 않습니다.'));return;}
+    if(deploymentMode==='demo'){$('uploads').replaceChildren(el('p','분석에 필요한 자료가 자동으로 준비됩니다. 분석 실행을 눌러 진행하세요.'));return;}
     const box=$('uploads');box.replaceChildren();state.uploadEditors.clear();const job=state.job;const feature=state.features.find(f=>f.module===job.module);if(!feature)return;
     if(job.status!=='created'){box.append(el('p','분석 시점 자료가 고정되었습니다.','muted'));return;}
     for(const slot of feature.inputs){
@@ -121,7 +121,7 @@ async function saveBlob(path,name){
     const url=URL.createObjectURL(blob),a=el('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);
 }
 $('connect').addEventListener('click',guarded(connect));$('module').addEventListener('change',()=>{renderParameters();renderFeatureNav();$('pageTitle').textContent=names[$('module').value]||'감사 분석 워크스페이스';});
-$('create').addEventListener('click',guarded(async()=>{client.clearTimer(state.poll);state.job=await api('jobs',json('POST',{module:$('module').value,parameters:deploymentMode==='demo'?{}:readParameters()}));clearResult();showJob();uploadForms();await refreshMaterials();await refreshJobs();showPanel('setup');message(deploymentMode==='demo'?'합성 샘플로 작업을 만들었습니다. 분석 실행을 누르세요.':'작업을 만들었습니다. 필요한 자료를 업로드하세요.');}));
+$('create').addEventListener('click',guarded(async()=>{client.clearTimer(state.poll);state.job=await api('jobs',json('POST',{module:$('module').value,parameters:deploymentMode==='demo'?{}:readParameters()}));clearResult();showJob();uploadForms();await refreshMaterials();await refreshJobs();showPanel('setup');message(deploymentMode==='demo'?'분석 작업을 만들었습니다. 분석 실행을 눌러 진행하세요.':'작업을 만들었습니다. 필요한 자료를 업로드하세요.');}));
 $('load').addEventListener('click',guarded(loadJob));$('run').addEventListener('click',guarded(async()=>{if(automaticPending(state.job.job_id)||automaticProblems(state.job.job_id))throw Error('파일·자료 정보 저장이 끝난 뒤 분석을 실행하세요.');state.job=await api(jobPath('/run'),{method:'POST'});showJob();uploadForms();await refreshJobs();schedulePoll();message('분석 중입니다. 완료될 때까지 상태를 확인합니다.');}));
 $('table').addEventListener('change',guarded(async()=>{state.table=$('table').value;state.offset=0;await loadTable();}));$('prev').addEventListener('click',guarded(async()=>{state.offset=Math.max(0,state.offset-25);await loadTable();}));$('next').addEventListener('click',guarded(async()=>{state.offset+=25;await loadTable();}));
 $('noteForm').addEventListener('submit',guarded(async()=>{if(!state.selected)throw Error('검토할 결과 행을 선택하세요.');await api(jobPath('/review/notes/'+state.selected),json('PUT',{revision:state.review.review_log.revision,status:$('noteStatus').value,explanation:$('explanation').value,evidence_reference:$('evidence').value,conclusion:$('conclusion').value,reference_ids:Array.from($('referenceIds').selectedOptions,o=>o.value)}));state.review=await api(jobPath('/review'));const current=state.selected;if(current){const note=state.review.review_log.events.filter(e=>e.review_id===current).at(-1);$('noteHistory').append(el('p',`${note.at} · ${note.reviewer} · ${note.status} · ${note.conclusion}`,'history'));}message('검토 이력을 저장했습니다. 최신 검토 이력을 별도로 내려받을 수 있습니다.');}));
@@ -182,8 +182,8 @@ async function startDemo(){
         await applyFeatures(data);
         $('module').value='cash_proofing';$('module').dispatchEvent(new Event('change'));
         $('connectionStatus').textContent='방문자 전용 데모 연결됨';
-        $('demoStatus').textContent='연결되었습니다. 기능을 선택하고 작업 만들기 → 분석 실행 → 조서 ZIP 순서로 체험하세요.';
-        message('자금 대사 샘플이 준비되어 있습니다. 이 조건으로 작업 만들기를 누르세요.');
+        $('demoStatus').textContent='연결되었습니다. 기능 선택 → 분석 작업 만들기 → 분석 실행 → 검토 조서 다운로드 순서로 진행하세요.';
+        message('자금 대사를 시작할 수 있습니다. 분석 작업 만들기를 눌러 진행하세요.');
     }finally{$('demoStart').disabled=false;}
 }
 $('demoStart').addEventListener('click',guarded(startDemo));
@@ -197,9 +197,9 @@ async function initializeDeployment(){
         $('demoPanel').hidden=deploymentMode!=='demo';
         document.querySelector('.accessPanel').hidden=deploymentMode==='demo';
         if(deploymentMode==='demo'){
-            document.querySelector('.uploadCard h2').textContent='합성 샘플';document.querySelector('.uploadCard > .muted').textContent='서버가 기능별 합성 자료를 준비합니다. 작업을 만든 뒤 분석 실행을 누르세요.';
+            document.querySelector('.uploadCard h2').textContent='분석 자료';document.querySelector('.uploadCard > .muted').textContent='기능별로 준비된 자료를 바탕으로 분석을 실행합니다.';
             $('parameterForm').hidden=true;$('parameters').closest('details').hidden=true;
-            $('create').textContent='합성 샘플로 작업 만들기';
+            $('create').textContent='분석 작업 만들기';
         }
     }catch(error){message(error.message,true);}
 }
