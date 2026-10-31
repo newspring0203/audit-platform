@@ -6,23 +6,7 @@ AICPA ADS 영문 명세의 GL 관련 4개 데이터셋 69개 필드를 학습하
 
 **[대표 결과 보기](#results) · [핵심 코드 확인](#code-map) · [직접 실행하기](#run) · [참고 자료와 기여 범위](#sources)**
 
-**[GitHub 저장소](https://github.com/newspring0203/audit-platform)** · 웹 데모: 배포 계정 연결 대기 · 시연 영상: 제작 전
-
-## 공개 데모 사용법
-
-공개 데모는 면접관이 가입·토큰 입력 없이 합성 자료로 기능을 확인하는 포트폴리오용 환경이다. 배포 완료 후 이 위치에 실제 접속 주소를 추가한다.
-
-1. **데모 시작**을 누른다. 방문자별 임시 세션을 HTTPS 전용 HttpOnly 쿠키로 발급한다.
-2. **자금 대사** 등 기능을 선택하고 **합성 샘플로 작업 만들기**를 누른다.
-3. **분석 실행**을 누른다. 서버가 고정된 합성 샘플과 시연 조건을 자동 적용한다.
-4. 결과표·원본 연결을 살펴보고 **분석 조서 ZIP**을 다운로드한다.
-5. **데모 종료**로 세션을 폐기한다.
-
-합성 샘플이 있는 분석 9종을 제공한다. SAP 원본 업로드와 KYC 외부 공시 수집은 로컬 환경에서 사용한다. 공개 데모는 파일 업로드와 외부 API 호출을 차단한다. 검토 메모에도 실제 업무 내용·개인정보를 입력하지 않는다. 조서 ZIP에는 CSV·JSON·Markdown이 포함되며, 전용 Excel 렌더러를 설정하지 않은 배포에서는 XLSX 조서를 제공하지 않는다.
-
-세션은 발급 1시간 후, 작업은 생성 1시간 후 접근이 차단된다. 파일은 서버가 실행 중일 때 기본 30초 간격으로 만료 작업을 정리한다. 재시작·재배포·휴면 후에는 작업과 세션이 더 일찍 사라질 수 있다. 영구 보관 서비스가 아니므로 필요한 조서는 다운로드한다.
-
-무료 Render는 일정 시간 미사용 시 휴면하며 첫 접속에 시간이 걸릴 수 있다. [Render 무료 서비스 정책](https://render.com/docs/free)을 참고한다.
+웹 데모는 배포 전이며, 시연 영상은 제작 전이다. 현재는 아래 실행 방법과 공개용 합성 입력 자료로 확인할 수 있다.
 
 ![SAP 전처리 실행 결과에서 GL 28160행 TB 1088행과 대사 차이 0을 보여주는 화면](docs/portfolio/images/sap-results.png)
 
@@ -130,36 +114,14 @@ python3.12 -m venv .venv
 
 [기능별 시연 입력 안내](submission/demo_input_guide.md)에는 기존 기능의 입력·예상 결과가 있으며, 조회 회신 입력과 판정 사례는 [테스트 코드](tests/test_confirmations.py)에 있다. 공시 수집에는 별도의 DART 키가 필요하다. AI 요약은 서버에서 기본 비활성화되어 있으며 실제 호출 성공은 확인하지 않았다.
 
-### 배포 설정
-
-배포 파일은 `Dockerfile`, `render.yaml`, `requirements-deploy.txt`이다. 서버 실행은 `python scripts/run_server.py`를 사용하며 플랫폼의 `PORT`를 받아 `0.0.0.0`에서 실행한다. ASGI 프로세스는 반드시 1개로 유지한다. 분석 자식 프로세스 수는 별도로 제한한다.
-
-| 환경변수 | 공개 데모 설정 | 용도 |
-|---|---|---|
-| `AUDIT_MODE` | `demo` | `local`·`demo`·`private` 인증/기능 분리 |
-| `AUDIT_PUBLIC_ORIGIN` | 실제 HTTPS 주소 | 쿠키 요청 출처 검사. Render에서는 `RENDER_EXTERNAL_URL` 자동 사용 |
-| `AUDIT_RUNTIME_ROOT` | `/tmp/audit-platform` | 웹에 노출되지 않는 임시 SQLite·작업 폴더 |
-| `AUDIT_JOB_TTL_SECONDS` | `3600` | 작업 접근 만료 및 파일 정리 기준 |
-| `AUDIT_CLEANUP_SECONDS` | `30` | 서버 실행 중 정리 간격 |
-| `AUDIT_MAX_JOBS_TOTAL` | `20` | 전체 활성 작업 수 제한. 방문자당 최대 3개 |
-| `AUDIT_MAX_DEMO_SESSIONS` | `100` | 전체 활성 방문자 세션 수 제한 |
-| `AUDIT_ANALYSIS_WORKERS` | `1` | 동시 분석 수 |
-| `AUDIT_RUN_TIMEOUT_SECONDS` | `120` | 분석 실행 시간 제한 |
-
-`local`에서만 프로젝트 `.env`의 외부 API 설정을 읽는다. 배포에서는 호스팅 환경변수로 주입한다. 공개 데모에는 DART/OpenAI 키를 등록하지 않는다. `private` 모드는 운영자 발급 Bearer 토큰용이며 공개 데모와 구분한다. 기업 서비스용 인증을 대체하지 않는다.
-
-Render에서 이 저장소의 Blueprint를 연결하면 `render.yaml`의 무료 Docker 웹 서비스를 생성한다. `/health`로 상태를 확인한다. 자세한 배포·검증 절차는 [배포 안내](docs/deployment.md)에 있다.
-
 ### 검증과 결과 재생성
 
 ```bash
 .venv/bin/python -m unittest discover -s tests -p 'test_*.py' -v
 .venv/bin/python scripts/build_portfolio_evidence.py
-.venv/bin/python scripts/check_publication.py
-node --test tests/frontend_session.test.mjs
 ```
 
-첫 명령은 전체 검사를 실행한다. 공개 저장소에 포함하지 않는 학습 노트북 대조 검사 2개는 노트북이 없으면 건너뛰며, 합성 SAP 입력을 사용하는 API 검사는 실행한다. README의 자금·조회 회신 결과는 두 번째 명령으로 합성 입력에서 다시 생성할 수 있다. 입력·소스 해시와 실행 조건을 [실행 기록](docs/portfolio/evidence/run_manifest.json)에 남긴다. 위 그림은 화면 캡처가 아닌 CSV 실행 결과를 시각화한 표이다.
+첫 명령은 전체 검사를 실행하며 SAP 원본을 사용하는 일부 검사는 로컬 학습 자료가 별도로 필요하다. README의 자금·조회 회신 결과는 두 번째 명령으로 합성 입력에서 다시 생성할 수 있다. 입력·소스 해시와 실행 조건을 [실행 기록](docs/portfolio/evidence/run_manifest.json)에 남긴다. 위 그림은 화면 캡처가 아닌 CSV 실행 결과를 시각화한 표이다.
 
 <a id="sources"></a>
 ## 학습 자료와 기여 범위
@@ -182,10 +144,10 @@ node --test tests/frontend_session.test.mjs
 
 분석 결과는 추가 확인이 필요한 검토 대상이며, 오류·부정이나 감사의견을 확정하지 않는다. SAP 학습 예제·합성 시연 자료·실제 공개 공시는 서로 구분한다. 전체 ADS 준수나 Audit Data API 적합성을 검증한 구현은 아니다.
 
-- 로컬은 개발용 Bearer 토큰, 공개 데모는 방문자별 임시 쿠키 세션을 사용한다. 기업용 SSO·영구 저장·다중 서버 운영은 구현 범위 밖이다.
+- 웹은 개발용 토큰과 임시 작업 보관을 사용하는 로컬 MVP이다. 공개 서비스 운영 인증은 별도 과제이다.
 - GL·TB 대사 차이가 0이어도 ERP 추출의 완전성·증빙의 적정성을 입증하지 않는다.
 - JET 로그 금액 대사는 필요한 근거를 확보·승인하지 못하면 미실행으로 남긴다.
 - 조회 회신은 확보된 정리표 비교이며 발송·진위 확인·미회신 대체절차를 수행하지 않는다.
 - 계정과목·재무제표 항목 전체 연결, 사용자 상태 이력 검증, AI 실제 호출 검증은 후속 과제이다.
 
-웹 데모 주소가 발급되면 [링크 관리 파일](docs/portfolio/links.json)에 웹 데모·GitHub·영상 주소와 제출 기준 커밋을 기록한다. 현재 코드 링크는 저장소 상대 경로이며, 제출 시 검증한 커밋의 영구 링크로 고정한다.
+공개 주소가 생기면 [링크 관리 파일](docs/portfolio/links.json)에 웹 데모·GitHub·영상 주소와 제출 기준 커밋을 기록한다. 현재 코드 링크는 저장소 상대 경로이며, 제출 시 검증한 커밋의 영구 링크로 고정한다.
