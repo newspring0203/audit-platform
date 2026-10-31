@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="688" viewBox="0 0 1280 688" role="img" aria-labelledby="title desc">
+<title id="title">매출채권 조회 회신에서 금액과 비교 가능 여부를 구분</title><desc id="desc">기준일 2026-10-31 · KRW · 장부 6행 / 요청 5행 / 회신 4행 부분 회신·기준일 차이는 금액이 같아도 차이를 계산하지 않는다. —는 0이 아니다.</desc>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<g font-family="Arial Unicode MS, Apple SD Gothic Neo, sans-serif" fill="#173c30">
+<text x="38" y="50" font-size="27" font-weight="bold">매출채권 조회 회신에서 금액과 비교 가능 여부를 구분</text>
+<text x="38" y="90" font-size="18" fill="#52665d">기준일 2026-10-31 · KRW · 장부 6행 / 요청 5행 / 회신 4행</text>
+<rect x="28" y="146" width="1224" height="62" fill="#e9f0ec"/>
+<text x="38" y="185" font-size="20" font-weight="bold">요청 ID</text>
+<text x="233" y="185" font-size="20" font-weight="bold">장부 잔액</text>
+<text x="453" y="185" font-size="20" font-weight="bold">회신 잔액</text>
+<text x="673" y="185" font-size="20" font-weight="bold">계산 차이</text>
+<text x="873" y="185" font-size="20" font-weight="bold">회신 상태</text>
+<rect x="28" y="208" width="1224" height="62" fill="#f7f9f8"/>
+<text x="38" y="247" font-size="20">AR1</text>
+<text x="233" y="247" font-size="20">1,000</text>
+<text x="453" y="247" font-size="20">1,000</text>
+<text x="673" y="247" font-size="20">0</text>
+<text x="873" y="247" font-size="20">일치</text>
+<path d="M28 270H1252" stroke="#dae3dd"/>
+<text x="38" y="309" font-size="20">AR2</text>
+<text x="233" y="309" font-size="20">1,000</text>
+<text x="453" y="309" font-size="20">900</text>
+<text x="673" y="309" font-size="20">100</text>
+<text x="873" y="309" font-size="20">금액 차이</text>
+<path d="M28 332H1252" stroke="#dae3dd"/>
+<rect x="28" y="332" width="1224" height="62" fill="#f7f9f8"/>
+<text x="38" y="371" font-size="20">AR3</text>
+<text x="233" y="371" font-size="20">1,000</text>
+<text x="453" y="371" font-size="20">—</text>
+<text x="673" y="371" font-size="20">—</text>
+<text x="873" y="371" font-size="20">미회신</text>
+<path d="M28 394H1252" stroke="#dae3dd"/>
+<text x="38" y="433" font-size="20">AR4</text>
+<text x="233" y="433" font-size="20">1,000</text>
+<text x="453" y="433" font-size="20">1,000</text>
+<text x="673" y="433" font-size="20">—</text>
+<text x="873" y="433" font-size="20">부분 회신</text>
+<path d="M28 456H1252" stroke="#dae3dd"/>
+<rect x="28" y="456" width="1224" height="62" fill="#f7f9f8"/>
+<text x="38" y="495" font-size="20">AR5</text>
+<text x="233" y="495" font-size="20">1,000</text>
+<text x="453" y="495" font-size="20">1,000</text>
+<text x="673" y="495" font-size="20">—</text>
+<text x="873" y="495" font-size="20">기준일 차이</text>
+<path d="M28 518H1252" stroke="#dae3dd"/>
+<text x="38" y="557" font-size="20">요청 없음</text>
+<text x="233" y="557" font-size="20">1,000</text>
+<text x="453" y="557" font-size="20">—</text>
+<text x="673" y="557" font-size="20">—</text>
+<text x="873" y="557" font-size="20">미요청</text>
+<path d="M28 580H1252" stroke="#dae3dd"/>
+<text x="38" y="622" font-size="19">부분 회신·기준일 차이는 금액이 같아도 차이를 계산하지 않는다. —는 0이 아니다.</text>
+<text x="38" y="657" font-size="16" fill="#52665d">합성 입력 자료를 Python 함수로 재실행한 결과 표이다. 웹 화면 캡처가 아니다.</text>
+</g></svg>

@@ -1,0 +1,2 @@
+Bank_Account,Currency,As_Of_Date,Bank_Balance,GL_Balance,Bank_Adjustment,Adjustment_Reference,Bank_Balance_Cents,GL_Balance_Cents,Bank_Adjustment_Cents,Adjusted_Bank_Balance,Difference_Cents,Difference,Status
+DEMO_BANK_01,KRW,20261031,112000,110000,-2000,DEMO_ADJ_01,11200000,11000000,-200000,110000.0,0,0.0,arithmetic_match

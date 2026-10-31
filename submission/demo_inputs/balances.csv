@@ -1,0 +1,2 @@
+﻿Bank_Account,Currency,As_Of_Date,Bank_Balance,GL_Balance,Bank_Adjustment,Adjustment_Reference
+DEMO_BANK_01,KRW,20261031,112000,110000,-2000,DEMO_ADJ_01

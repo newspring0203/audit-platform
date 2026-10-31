@@ -1,0 +1,7 @@
+Business_Unit_Code,Counterparty_ID,Currency,As_Of_Date,Request_ID,Book_Balance,Confirmed_Balance,Difference,Status,Response_Status,Reply_As_Of_Date,Reply_Scope,Evidence_Reference,Ledger_Source_Row,Request_Source_Row,Reply_Source_Row,Terms_Review_Required,Review_Status,Suggested_Review
+DEMO:HQ,DEMO_C1,KRW,20261031,AR1,1000.0,1000.0,0.0,matched,confirmed,20261031,Business_Unit_Code=DEMO:HQ; Counterparty_ID=DEMO_C1; Currency=KRW,SYNTHETIC_AR_REPLY_1,2,2.0,2.0,False,미검토,회신 원본·진위·잔액 범위와 차이 원인을 확인하고 후속 절차를 기록한다.
+DEMO:HQ,DEMO_C2,KRW,20261031,AR2,1000.0,900.0,100.0,difference,confirmed,20261031,Business_Unit_Code=DEMO:HQ; Counterparty_ID=DEMO_C2; Currency=KRW,SYNTHETIC_AR_REPLY_2,3,3.0,3.0,False,미검토,회신 원본·진위·잔액 범위와 차이 원인을 확인하고 후속 절차를 기록한다.
+DEMO:HQ,DEMO_C3,KRW,20261031,AR3,1000.0,,,no_reply,,,,,4,4.0,,False,미검토,회신 원본·진위·잔액 범위와 차이 원인을 확인하고 후속 절차를 기록한다.
+DEMO:HQ,DEMO_C4,KRW,20261031,AR4,1000.0,1000.0,,partial,partial,20261031,Business_Unit_Code=DEMO:HQ; Counterparty_ID=DEMO_C4; Currency=KRW,SYNTHETIC_AR_REPLY_4,5,5.0,4.0,False,미검토,회신 원본·진위·잔액 범위와 차이 원인을 확인하고 후속 절차를 기록한다.
+DEMO:HQ,DEMO_C5,KRW,20261031,AR5,1000.0,1000.0,,date_mismatch,confirmed,20260930,Business_Unit_Code=DEMO:HQ; Counterparty_ID=DEMO_C5; Currency=KRW,SYNTHETIC_AR_REPLY_5,6,6.0,5.0,False,미검토,회신 원본·진위·잔액 범위와 차이 원인을 확인하고 후속 절차를 기록한다.
+DEMO:HQ,DEMO_C6,KRW,20261031,,1000.0,,,not_requested,,,,,7,,,False,미검토,회신 원본·진위·잔액 범위와 차이 원인을 확인하고 후속 절차를 기록한다.

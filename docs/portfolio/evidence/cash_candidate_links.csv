@@ -1,0 +1,5 @@
+Row_ID_Bank,Row_ID_GL,Bank_Account,Currency,Date_Bank,Date_GL,Amount,Date_Difference_Days,Match_Basis,Candidate_Status
+B2,G2,DEMO_BANK_01,KRW,20261020,20261020,-5000.0,0,동일일자 유일 후보,unique
+B4,G4,DEMO_BANK_01,KRW,20261026,20261026,3000.0,0,동일일자 유일 후보,ambiguous
+B5,G4,DEMO_BANK_01,KRW,20261026,20261026,3000.0,0,동일일자 유일 후보,ambiguous
+B1,G1,DEMO_BANK_01,KRW,20261028,20261029,100000.0,1,설정 시차 이내 상호 유일 후보,unique

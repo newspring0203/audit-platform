@@ -1,0 +1,6 @@
+﻿Source_Field,Target_Field
+전표번호,Journal_ID
+계정번호,GL_Account_Number
+거래일자,Effective_Date
+금액,Amount
+입력자,Entered_By

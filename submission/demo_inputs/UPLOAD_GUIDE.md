@@ -1,0 +1,41 @@
+# 시연 파일 넣는 순서
+
+모든 입력은 `data/demo/v1`의 합성 자료입니다. 실제 회사·고객 자료가 아닙니다. VS Code 탐색기에서 이 폴더를 펼쳐 놓고 시작하세요. 파일 선택 창에서는 ⌘⇧G를 눌러 `/Users/saebom/audit-platform/data/demo/v1`을 입력해도 됩니다.
+
+## 먼저 찍을 추천 시나리오: 분석적 검토
+
+1. 왼쪽 **분석적 검토** 선택.
+2. 당기 2026 / 전기 2025 / 증감률 30 / TB 기간 10 입력.
+3. 합성 TB 부호 기준은 차변 양수·대변 음수이므로 해당 확인값 선택. 실제 파일은 확인 없이 선택하지 않습니다.
+4. **이 조건으로 작업 만들기** 클릭.
+5. gl → `gl_comparison.csv`, tb → `tb.csv`, account_mapping → `account_mapping.csv` 업로드.
+6. PBC는 `DEMO-GL-01`, `DEMO-TB-01`, `DEMO-MAP-01`로 입력 가능. GL 기간은 2025-09-01~2026-10-31, TB 기간은 2025-10-31~2026-10-31이며 두 연도의 비교용 자료입니다.
+7. **분석 실행** → 결과 탭: 비교 계정 2개, 검토 후보 2개. 계정 1000 순변동 3,000→7,000, 계정 4000 -3,000→-7,000. GL 순변동은 TB 잔액과 다릅니다.
+8. 표를 financial_ratios로 바꾸면 유동비율 2025년 4배, 2026년 5배를 확인합니다.
+9. year_comparison의 확인 버튼 → 검토 기록 탭 → gl 원본 → 원본 행과 산식 확인.
+10. 검토중 / 증빙 참조 `DEMO-GL-01` / 설명 “합성 입력의 9·10월 거래를 비교함” / 결론 “추가 증빙 확인 필요”를 입력하고 저장.
+11. 분석 조서 ZIP과 최신 검토 이력을 각각 다운로드. 다운로드한 결과는 새 입력 슬롯에 무작정 다시 올리지 않습니다.
+
+## 다른 기능별 정확한 입력
+
+| 메뉴 | 슬롯 → 파일 | 조건 | 볼 결과 |
+|---|---|---|---|
+| 총계정원장 테스트 | gl → gl_jet.csv / log → log_control.csv | 정액 1000 / 저빈도 사용자 10 / 저빈도 계정 3 / 복합 최소 2. 회사·연도는 빈칸 가능(이미 복합 키인 D/C 로그) | 6행·3전표, 주말·야간 각 1전표. 로그 대사는 근거 미승인으로 미실행이 정상 |
+| 입력 사용자별 GL 분할 | gl → gl_jet.csv | Entered_By / 500 | 3파일로 총 6행 보존. group_index로 사용자·파일 대응 확인 |
+| 자금 대사 | bank → bank.csv / cash_gl → cash_gl.csv / balances → balances.csv | 기준일 2026-10-31 / 시차 2 / 장기 5 | 연결 2건, 시차 연결 1건, 은행 미대사 3건·GL 미대사 2건. 중복 후보 자동 연결 안 함 |
+| 재고 분석 | movements → movements.csv / opening → opening.csv / lot_snapshot → lot_snapshot.csv | 기준일 2026-10-31 / 장기 180 | 기간 중 음수 1건, 기말 음수 0건, 장기 미출고 후보 1개. 로트 수량 대사 후 연령 집계 |
+| 데이터 클렌징 | data → cleansing_raw.csv / mapping → cleansing_mapping.csv | 필수: GL_Account_Number, Effective_Date, Amount / 날짜: Effective_Date / 금액: Amount | 오류 7개, 중복 관련 행 2개, 이름 매핑 후에도 잘못된 값은 보존 |
+| QuickBooks 전처리 | quickbooks → quickbooks_report.xlsx | 날짜 %Y-%m-%d | 원본 6행 → 거래 2행. 계정 표제 연결·합계 제외·Num 0001 보존. ADS 변환 아님 |
+| KYC 공시 | 파일 업로드 없음 | 회사명·기간 지정, AI 끔 | 외부 API가 필요한 별도 시나리오. 로컬 합성 파일로 실제 공시 수집을 흉내 내지 않음 |
+
+CSV는 UTF-8 BOM이며 코드·날짜는 텍스트로 읽도록 준비했습니다. Excel에서 열었다 저장하면 선행 0이나 날짜 형식이 바뀔 수 있으므로 시연에는 원본 파일을 그대로 올리세요. QuickBooks CSV 대체 파일도 있으나 촬영에는 Excel을 권장합니다.
+
+## 노트북과 보고서 자료
+
+- `notebooks/demo_walkthrough_executed.ipynb`: 실제 실행 번호와 출력이 저장된 노트북. QuickBooks 전후·컬럼 매핑 전후·오류 표·연도 비교·사용자별 분할을 확인합니다.
+- `submission/evidence/demo_walkthrough.html`: 노트북 없이 볼 수 있는 같은 실행 결과.
+- `submission/evidence/quickbooks_before.png`, `quickbooks_after.png`: 실제 합성 파일과 실행 결과를 렌더링한 보고서 그림.
+- `submission/evidence/executed_checks.json`: 실행 검증값과 입력 해시.
+- `data/demo/v1/expected_results.json`: 엔진으로 실제 계산한 기능별 예상값. 화면 결과 확인에 사용합니다.
+
+파일은 한 기능씩 새 작업을 만들어 넣으세요. 활성 작업 한도는 기본 3개이므로 시연 중 작업이 쌓이면 필요한 결과를 저장한 뒤 불필요한 합성 작업을 삭제합니다. 토큰·키 입력 장면은 촬영하지 마세요. KYC 실제 호출·GitHub 공개·영상 업로드는 이번 파일 준비와 구분합니다.

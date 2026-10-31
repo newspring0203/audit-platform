@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="564" viewBox="0 0 1280 564" role="img" aria-labelledby="title desc">
+<title id="title">자금 대사에서 중복 후보를 자동 연결하지 않는 처리</title><desc id="desc">기준일 2026-10-31 · KRW · 허용 시차 1일 · 은행 5행 / 장부 4행 유일 후보 2쌍만 연결한다. 3,000원 후보 2개는 원본 증빙을 확인할 대상으로 남긴다.</desc>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<g font-family="Arial Unicode MS, Apple SD Gothic Neo, sans-serif" fill="#173c30">
+<text x="38" y="50" font-size="27" font-weight="bold">자금 대사에서 중복 후보를 자동 연결하지 않는 처리</text>
+<text x="38" y="90" font-size="18" fill="#52665d">기준일 2026-10-31 · KRW · 허용 시차 1일 · 은행 5행 / 장부 4행</text>
+<rect x="28" y="146" width="1224" height="62" fill="#e9f0ec"/>
+<text x="38" y="185" font-size="20" font-weight="bold">은행 행</text>
+<text x="213" y="185" font-size="20" font-weight="bold">장부 행</text>
+<text x="388" y="185" font-size="20" font-weight="bold">금액</text>
+<text x="608" y="185" font-size="20" font-weight="bold">일자 차이</text>
+<text x="778" y="185" font-size="20" font-weight="bold">처리 결과</text>
+<rect x="28" y="208" width="1224" height="62" fill="#f7f9f8"/>
+<text x="38" y="247" font-size="20">B2</text>
+<text x="213" y="247" font-size="20">G2</text>
+<text x="388" y="247" font-size="20">-5,000</text>
+<text x="608" y="247" font-size="20">0일</text>
+<text x="778" y="247" font-size="20">자동 연결</text>
+<path d="M28 270H1252" stroke="#dae3dd"/>
+<text x="38" y="309" font-size="20">B4</text>
+<text x="213" y="309" font-size="20">G4</text>
+<text x="388" y="309" font-size="20">3,000</text>
+<text x="608" y="309" font-size="20">0일</text>
+<text x="778" y="309" font-size="20">중복 후보 · 미연결</text>
+<path d="M28 332H1252" stroke="#dae3dd"/>
+<rect x="28" y="332" width="1224" height="62" fill="#f7f9f8"/>
+<text x="38" y="371" font-size="20">B5</text>
+<text x="213" y="371" font-size="20">G4</text>
+<text x="388" y="371" font-size="20">3,000</text>
+<text x="608" y="371" font-size="20">0일</text>
+<text x="778" y="371" font-size="20">중복 후보 · 미연결</text>
+<path d="M28 394H1252" stroke="#dae3dd"/>
+<text x="38" y="433" font-size="20">B1</text>
+<text x="213" y="433" font-size="20">G1</text>
+<text x="388" y="433" font-size="20">100,000</text>
+<text x="608" y="433" font-size="20">1일</text>
+<text x="778" y="433" font-size="20">자동 연결</text>
+<path d="M28 456H1252" stroke="#dae3dd"/>
+<text x="38" y="498" font-size="19">유일 후보 2쌍만 연결한다. 3,000원 후보 2개는 원본 증빙을 확인할 대상으로 남긴다.</text>
+<text x="38" y="533" font-size="16" fill="#52665d">합성 입력 자료를 Python 함수로 재실행한 결과 표이다. 웹 화면 캡처가 아니다.</text>
+</g></svg>

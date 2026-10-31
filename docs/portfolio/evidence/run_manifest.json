@@ -1,0 +1,69 @@
+{
+  "generated_at_utc": "2026-10-31T08:30:14.578484+00:00",
+  "data_kind": "synthetic",
+  "cash": {
+    "parameters": {
+      "date_tolerance_days": 1,
+      "as_of": "20261031",
+      "aging_days": 30
+    },
+    "summary": {
+      "bank_row_count": 5,
+      "gl_row_count": 4,
+      "matched_count": 2,
+      "timing_match_count": 1,
+      "unmatched_bank_count": 3,
+      "unmatched_gl_count": 2,
+      "ambiguous_candidate_count": 2,
+      "candidate_limit_group_count": 0,
+      "balance_reconciliation_status": "arithmetic_match"
+    }
+  },
+  "ar": {
+    "parameters": {
+      "as_of": "20261031",
+      "amount_tolerance": 0
+    },
+    "summary": {
+      "ledger_row_count": 6,
+      "request_count": 5,
+      "reply_count": 4,
+      "matched_count": 1,
+      "review_row_count": 5,
+      "no_reply_count": 1,
+      "not_requested_count": 1,
+      "difference_count": 1,
+      "orphan_reply_count": 0
+    }
+  },
+  "input_sha256": {
+    "data/demo/v1/bank.csv": "ba76d864cba63e5006f463dabc40a4ccd9694f84e8c42a69f149c6003868213a",
+    "data/demo/v1/cash_gl.csv": "42359c3017d8f08b1c454e7ce6ca0609738556ec135e079dc6e9dfbfacfdcc1a",
+    "data/demo/v1/balances.csv": "73ad533924d572e2afea8e636af0171439933339daa5f4cad952ec4dc19eb2b9",
+    "data/demo/confirmations/AR_ledger.csv": "d1632dbb311493dd21056a32416016531582a55023747c3659cd9c0a2794fe06",
+    "data/demo/confirmations/AR_requests.csv": "d60934f802ca0f35ac30713e448edcb8d6944350731bf9bd1d2df57e0c7ee34f",
+    "data/demo/confirmations/AR_replies.csv": "fd73ef53c03249cf225b3ed6d5118cc4a0f98d33e5c4631b920337ebb0829237"
+  },
+  "source_sha256": {
+    "src/audit_data_lab/cash.py": "52acca9d4f0448f01fe7cdd7b88a86f7db8b8299cbea49b5bdc9707fedece0f3",
+    "src/audit_data_lab/confirmations.py": "7647ffb838ddf7c3d89fb26c2b491a480e81ca6b7a112d48ee5a10252717cd54",
+    "src/audit_data_lab/common.py": "5954941775eb249a1d7c16e819f1ec74d90abbd337d17c38087580b8d3c4e6a3",
+    "src/audit_data_lab/validation.py": "af9ee2ec2a89ce4bf2825e91444108462c754406dde6d79ff3aef941fb7c7cb2",
+    "src/audit_data_lab/cash_balances.py": "e056c115477199f495a4084a403f02b58084616d51e0423c388c0492d3d63547",
+    "scripts/build_portfolio_evidence.py": "fd2392cd33947dc54cd1988012b492e4e7e0f4f3f7a4197623cbd46a2b3793d8"
+  },
+  "generated_files_sha256": {
+    "evidence/ar_confirmation_comparison.csv": "8791442541eca35e3f2f653028f0a607174384c1ea79eec9882747985857eaf2",
+    "evidence/ar_review_items.csv": "ccb6e776c8328698d2aedbb6b188c4713d77d19d8f1449ac9ef0c886dc8c85f0",
+    "evidence/ar_unlinked_replies.csv": "e368435f19402ef78c3d21e4b1c6fe881cf1e1cae797d513885f4358b1e64811",
+    "evidence/cash_balance_reconciliation.csv": "6c98cc03fa4d005e737b5060615f9d152ba585cb554550520f9eb3cc56b334f9",
+    "evidence/cash_candidate_links.csv": "8fc21d728fbbcaefe16e38fb6a03f1b0a76607d3eded7801155bffaa0c15f0a8",
+    "evidence/cash_matches.csv": "a58665f15d5ec69f2a128c512820b98b8b9daaa2363f4733451353fa2180a698",
+    "evidence/cash_module_issues.csv": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+    "evidence/cash_review_items.csv": "06bbbed75ed4e77bf45ec21927964c218fe311e3d5d1d996b0278f90720f78f3",
+    "evidence/cash_unmatched_bank.csv": "27d3517964ce9c1d65a6bfcb02c4e106ddc2240b0841428a9c292db3ad4aac87",
+    "evidence/cash_unmatched_gl.csv": "f4bd13f58771ade1c058ffd196e8ea12a416440b036dad8845d9ba863e10c9ce",
+    "images/cash-result.svg": "bd283db19d5f847fa534ebbd8c48f09cb8268b9ed45f7dd37ce84e1e6e92bca1",
+    "images/ar-result.svg": "9114acd1d0ae4f23fd739c0fb9bf7f05955da9bffd524b12ee8cce59061ffc61"
+  }
+}

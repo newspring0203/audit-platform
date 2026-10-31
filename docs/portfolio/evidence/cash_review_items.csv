@@ -1,0 +1,6 @@
+Side,Row_ID,Source_Row,Bank_Account,Currency,Date,Amount,Candidate_Count,Days_Unmatched,Aged_Unmatched,Review_Reason,Suggested_Review
+Bank,B3,4,DEMO_BANK_01,KRW,20261025,7000.0,0,6,False,설정 조건에 맞는 상대 거래 없음: 시차·수수료·누락·분할 여부 확인,은행명세·전표·입출금 시점과 증빙을 확인하고 연결 여부 기록
+Bank,B4,5,DEMO_BANK_01,KRW,20261026,3000.0,1,5,False,중복 후보가 있어 자동으로 연결하지 않음,은행명세·전표·입출금 시점과 증빙을 확인하고 연결 여부 기록
+Bank,B5,6,DEMO_BANK_01,KRW,20261026,3000.0,1,5,False,중복 후보가 있어 자동으로 연결하지 않음,은행명세·전표·입출금 시점과 증빙을 확인하고 연결 여부 기록
+GL,G3,4,DEMO_BANK_01,KRW,20261022,-9000.0,0,9,False,설정 조건에 맞는 상대 거래 없음: 시차·수수료·누락·분할 여부 확인,은행명세·전표·입출금 시점과 증빙을 확인하고 연결 여부 기록
+GL,G4,5,DEMO_BANK_01,KRW,20261026,3000.0,2,5,False,중복 후보가 있어 자동으로 연결하지 않음,은행명세·전표·입출금 시점과 증빙을 확인하고 연결 여부 기록

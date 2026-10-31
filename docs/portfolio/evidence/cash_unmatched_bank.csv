@@ -1,0 +1,4 @@
+Row_ID,Bank_Account,Currency,Date,Amount,_amount_cents,Source_Row,Candidate_Count,Review_Reason,Days_Unmatched,Aged_Unmatched
+B3,DEMO_BANK_01,KRW,20261025,7000,700000,4,0,설정 조건에 맞는 상대 거래 없음: 시차·수수료·누락·분할 여부 확인,6,False
+B4,DEMO_BANK_01,KRW,20261026,3000,300000,5,1,중복 후보가 있어 자동으로 연결하지 않음,5,False
+B5,DEMO_BANK_01,KRW,20261026,3000,300000,6,1,중복 후보가 있어 자동으로 연결하지 않음,5,False
