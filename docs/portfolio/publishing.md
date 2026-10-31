@@ -1,11 +1,7 @@
 # 공개 주소와 제출 버전 연결
 
-현재 웹 데모·GitHub·영상 URL은 미발급 상태이다. 없는 주소를 링크로 표시하지 않았다.
+GitHub: https://github.com/newspring0203/audit-platform
 
-1. 이 프로젝트 전용 저장소의 주소를 확정한다.
-2. links.json의 github_url·website_url·youtube_url을 실제 발급한 주소로 채운다.
-3. 루트 README의 공개 준비 문장을 웹 데모·영상 링크로 교체하고 보고서 첫 페이지에도 같은 주소를 연결한다.
-4. 제출 기준 커밋을 검증한 후 report_commit에 기록한다. 대표 함수와 검증 코드의 상대 링크는 해당 커밋의 GitHub 영구 링크로 고정한다.
-5. PDF에서 링크를 직접 열어 사이트·README·기준 커밋이 같은 버전인지 확인한다.
+웹 데모는 Render 계정 연결 및 배포 성공 확인 후 기록한다. 현재 없는 서비스 주소를 실제 배포 링크로 표시하지 않는다. 배포 절차는 [배포 안내](../deployment.md)에 있다.
 
-코드 줄 번호는 현재 파일 기준이다. 함수 위치가 바뀌면 README 링크도 갱신한다. 공개 전에는 .env·.runtime·토큰·고객 자료가 포함되지 않았는지 확인한다.
+실제 주소에서 분석과 다운로드 검증 후 `links.json`의 website_url, README의 데모 링크를 함께 갱신한다. report_commit은 최종 제출 버전이 확정될 때 지정한다. 시연 영상은 제작 후 등록한다.
