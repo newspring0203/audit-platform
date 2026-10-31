@@ -57,6 +57,7 @@ def attach_traceability(result,frames,assets,*,run_id,parameters=None):
         return sorted(found) if found is not None else list(range(sources[slot]['first_data_row'],len(frames[slot])+sources[slot]['first_data_row']))
     def ref(slot,rows,role):
         return {'slot':slot,'dataset_version_id':sources[slot]['dataset_version_id'],'rows':rows,'role':role} if slot in sources and rows else None
+    sap_lineage=records(result.tables['sap_lineage']) if result.name=='sap_preprocessing' and 'sap_lineage' in result.tables else []
     tables={};trace={}
     for name,frame in list(result.tables.items()):
         data=records(frame);out=[]
@@ -76,7 +77,7 @@ def attach_traceability(result,frames,assets,*,run_id,parameters=None):
                 status='source_rows' if refs else 'unavailable'
                 definition={'conversion':'계정 표제 연결, 지정 날짜 형식 해석, 쉼표·괄호 금액 표준화. ADS 변환은 수행하지 않음.'}
             elif result.name=='sap_preprocessing' and name in {'gl','sap_supplement','sap_lineage'}:
-                lineage=result.tables['sap_lineage'].iloc[pos]
+                lineage=sap_lineage[pos]
                 add('bseg',[int(lineage['BSEG_Source_Row'])],'SAP 상세 원본 행')
                 add('bkpf',[int(lineage['BKPF_Source_Row'])],'회사·연도·전표번호로 결합한 SAP 헤더 행')
                 status='source_rows' if refs else 'unavailable'

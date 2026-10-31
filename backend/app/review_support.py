@@ -1,6 +1,7 @@
 """소유자 확인과 작업별 검토 파일 읽기·쓰기."""
 import json
 import os
+import zipfile
 from pydantic import ValidationError
 from .storage import ServiceError
 
@@ -24,7 +25,19 @@ class ReviewFiles:
         return json.loads(path.read_text())
 
     def snapshot(self, folder):
-        return self.load(folder / 'report' / 'review_snapshot.json')
+        snapshot = folder / 'report' / 'review_snapshot.json'
+        if not snapshot.exists() and (folder / 'bundle.zip').exists():
+            with zipfile.ZipFile(folder / 'bundle.zip') as bundle:
+                if 'review/processing_issue.json' in bundle.namelist():
+                    issue = json.loads(bundle.read('review/processing_issue.json'))
+                    messages = {
+                        'PROCESSING_TIMEOUT': '실행 시간 한도를 초과했습니다. 자료 범위를 나누거나 새 작업으로 재실행하세요.',
+                        'SERVER_RESTARTED': '서버가 재시작되어 실행이 중단됐습니다. 새 작업으로 재실행하세요.',
+                    }
+                    code = issue.get('code')
+                    if code not in messages: code = 'PROCESSING_FAILED'
+                    raise ServiceError(code, messages.get(code, '서버 처리 중 문제가 발생했습니다. 새 작업으로 재실행하세요.'), 409)
+        return self.load(snapshot)
 
     def save(self, path, data):
         tmp = path.with_suffix('.part')

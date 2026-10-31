@@ -1,4 +1,5 @@
 """Bearer 인증·요청 제한·오류 응답."""
+import asyncio
 from collections import defaultdict, deque
 from fastapi.responses import JSONResponse
 from .http_helpers import NO_STORE
@@ -57,11 +58,11 @@ def install_security(app, store, config, clock):
             if request.url.path.startswith('/api/'):
                 header = request.headers.get('Authorization', '')
                 if cookie_auth:
-                    principal = store.authenticate(request.cookies.get(COOKIE, ''))
+                    principal = await asyncio.to_thread(store.authenticate, request.cookies.get(COOKIE, ''))
                 else:
                     if not header.startswith('Bearer '):
                         raise ServiceError('UNAUTHENTICATED', '인증이 필요합니다.', 401)
-                    principal = store.authenticate(header[7:])
+                    principal = await asyncio.to_thread(store.authenticate, header[7:])
                 limiter.check((principal.tenant_id, principal.user_id))
                 request.state.principal = principal
             response = await call_next(request)

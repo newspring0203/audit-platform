@@ -78,13 +78,13 @@ def register_review_routes(app, store, small_json):
         return result | {'total': total, 'prior_version': prior_version, 'current_version': current.get('version_id', current['sha256']), 'period_basis': '제출자가 입력한 자료 기간이며 추출 완전성·기간 일치를 자동 입증하지 않습니다.'}
 
     @app.get('/api/jobs/{job_id}/review')
-    async def review(job_id: str, request: Request):
+    def review(job_id: str, request: Request):
         _, folder = files.owned(job_id, request, True)
         data = files.snapshot(folder)
         return {k: v for k, v in data.items() if k not in {'tables', 'trace'}} | {'tables': {k: {'columns': v['columns'], 'row_count': v['row_count']} for k, v in data['tables'].items()}, 'review_log': files.load(folder / 'review_log.json', {'revision': 0, 'events': [], 'references': {}})}
 
     @app.get('/api/jobs/{job_id}/review/tables/{table}')
-    async def table_rows(job_id: str, table: str, request: Request, offset: int=0, limit: int=50):
+    def table_rows(job_id: str, table: str, request: Request, offset: int=0, limit: int=50):
         if offset < 0 or not 1 <= limit <= 100:
             raise ServiceError('INVALID_PAGE', '페이지 범위를 확인하세요.', 422)
         _, folder = files.owned(job_id, request, True)

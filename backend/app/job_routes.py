@@ -65,7 +65,7 @@ def register_job_routes(app, store, manager, config, clock, small_json):
         return public_job(store.create_job(request.state.principal, spec.module, spec.parameters))
 
     @app.get('/api/jobs/{job_id}')
-    async def job_status(job_id: str, request: Request):
+    def job_status(job_id: str, request: Request):
         return public_job(store.owned(job_id, request.state.principal))
 
     @app.put('/api/jobs/{job_id}/inputs/{slot}')
