@@ -15,6 +15,20 @@ from .storage import ServiceError
 from .ui_schema import module_ui, TEMPLATES
 from .uploads import filename_suffix, validate_upload
 
+ZIP_NAMES = {
+    'kyc': 'Company_Overview.zip',
+    'sap_preprocessing': 'SAP_Data_Prep.zip',
+    'quickbooks_preprocessing': 'QuickBooks_Data_Prep.zip',
+    'gl_user_split': 'GL_Split_by_User.zip',
+    'data_cleansing': 'Data_Cleansing.zip',
+    'ar_confirmation': 'AR_Confirmations.zip',
+    'bank_confirmation': 'Bank_Confirmations.zip',
+    'jet': 'Journal_Entry_Testing.zip',
+    'analytical_review': 'Analytical_Review.zip',
+    'cash_proofing': 'Cash_Proofing.zip',
+    'inventory': 'Inventory_Analysis.zip',
+}
+
 def register_job_routes(app, store, manager, config, clock, small_json):
     @app.get('/health')
     async def health():
@@ -22,7 +36,7 @@ def register_job_routes(app, store, manager, config, clock, small_json):
 
     @app.get('/api/features')
     async def features():
-        return {'features': [{'module': name, 'inputs': value['inputs'], 'required_inputs': value['required_inputs'], 'optional_inputs': value['optional_inputs'], 'parameters': sorted(value['parameters']), 'ui': module_ui()[name], 'input_columns': TEMPLATES.get(name, {})} for name, value in MODULES.items()], 'downloads': '기능별 검토 결과 ZIP; CSV·JSON·Markdown 포함, 서버 렌더러 설정 시 Excel 포함', 'cache_policy': {'customer_data': 'no-store', 'public_disclosures': 'not_enabled'}}
+        return {'features': [{'module': name, 'zip_filename': ZIP_NAMES[name], 'inputs': value['inputs'], 'required_inputs': value['required_inputs'], 'optional_inputs': value['optional_inputs'], 'parameters': sorted(value['parameters']), 'ui': module_ui()[name], 'input_columns': TEMPLATES.get(name, {})} for name, value in MODULES.items()], 'downloads': '기능별 검토 결과 ZIP; CSV·JSON·Markdown 포함, 서버 렌더러 설정 시 Excel 포함', 'cache_policy': {'customer_data': 'no-store', 'public_disclosures': 'not_enabled'}}
 
     @app.get('/api/jobs')
     async def list_jobs(request: Request):
@@ -127,7 +141,7 @@ def register_job_routes(app, store, manager, config, clock, small_json):
                     yield chunk
             finally:
                 file.close()
-        return StreamingResponse(content(), media_type='application/zip', headers={**NO_STORE, 'Content-Disposition': 'attachment; filename="audit_review.zip"', 'X-Artifact-SHA256': row['artifact_sha']})
+        return StreamingResponse(content(), media_type='application/zip', headers={**NO_STORE, 'Content-Disposition': f'attachment; filename="{ZIP_NAMES[row["module"]]}"', 'X-Artifact-SHA256': row['artifact_sha']})
 
     @app.delete('/api/jobs/{job_id}', status_code=204)
     async def delete_job(job_id: str, request: Request):

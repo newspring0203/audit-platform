@@ -55,6 +55,8 @@ class AllDemoTests(unittest.TestCase):
                         response=client.put(base+'/review/notes/'+record,headers=h,json=note);self.assertEqual(response.status_code,200,response.text)
                         exported=client.get(base+'/review/export',headers=h).json();self.assertEqual(exported['review_log']['events'][-1]['reference_ids'],refs)
                         response=client.get(base+'/downloads/'+status['artifact']['artifact_id'],headers=h);self.assertEqual(response.status_code,200)
+                        filename=next(f['zip_filename'] for f in client.get('/api/features',headers=h).json()['features'] if f['module']==module)
+                        self.assertEqual(response.headers['content-disposition'],f'attachment; filename="{filename}"')
                         with zipfile.ZipFile(BytesIO(response.content)) as z:self.assertIn('review/analysis/summary.json',z.namelist());self.assertIn('review/review_snapshot.json',z.namelist())
                         self.assertEqual(client.delete(base,headers=h).status_code,204)
 
