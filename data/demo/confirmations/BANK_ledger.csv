@@ -1,0 +1,4 @@
+﻿Business_Unit_Code,Institution_ID,Account_ID,Item_Type,Currency,As_Of_Date,Balance,Interest_Rate,Maturity_Date,Collateral,Guarantees,Restrictions,Other_Arrangements
+DEMO:HQ,DEMO_BANK,DEMO_ACCOUNT_1,deposit,KRW,20261031,10000,1%,20271031,없음,없음,없음,없음
+DEMO:HQ,DEMO_BANK,DEMO_ACCOUNT_2,loan,KRW,20261031,10000,5%,20271031,없음,없음,없음,없음
+DEMO:HQ,DEMO_BANK,DEMO_ACCOUNT_3,deposit,KRW,20261031,10000,1%,20271031,없음,없음,없음,없음

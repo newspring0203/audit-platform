@@ -1,0 +1,151 @@
+{
+  "source": "SYNTHETIC DEMO ONLY",
+  "files": {
+    "gl_comparison.csv": {
+      "rows": 8,
+      "columns": [
+        "Journal_ID",
+        "Journal_ID_Line_Number",
+        "GL_Account_Number",
+        "Business_Unit_Code",
+        "Fiscal_Year",
+        "Period",
+        "Amount",
+        "Amount_Currency",
+        "Amount_Credit_Debit_Indicator",
+        "Effective_Date",
+        "Entered_Date",
+        "Entered_Time",
+        "Entered_By",
+        "Source",
+        "JE_Line_Description",
+        "JE_Header_Description"
+      ]
+    },
+    "gl_jet.csv": {
+      "rows": 6,
+      "columns": [
+        "Journal_ID",
+        "Journal_ID_Line_Number",
+        "GL_Account_Number",
+        "Business_Unit_Code",
+        "Fiscal_Year",
+        "Period",
+        "Amount",
+        "Amount_Currency",
+        "Amount_Credit_Debit_Indicator",
+        "Effective_Date",
+        "Entered_Date",
+        "Entered_Time",
+        "Entered_By",
+        "Source",
+        "JE_Line_Description",
+        "JE_Header_Description"
+      ]
+    },
+    "log_control.csv": {
+      "rows": 6,
+      "columns": [
+        "Journal_ID",
+        "Amount_Currency",
+        "Amount_Credit_Debit_Indicator",
+        "Total"
+      ]
+    },
+    "tb.csv": {
+      "rows": 10,
+      "columns": [
+        "Business_Unit_Code",
+        "GL_Account_Number",
+        "Fiscal_Year",
+        "Period",
+        "Amount_Currency",
+        "Amount_Ending"
+      ]
+    },
+    "account_mapping.csv": {
+      "rows": 5,
+      "columns": [
+        "Business_Unit_Code",
+        "GL_Account_Number",
+        "Metric_Group",
+        "Sign_Multiplier"
+      ]
+    },
+    "bank.csv": {
+      "rows": 5,
+      "columns": [
+        "Row_ID",
+        "Bank_Account",
+        "Currency",
+        "Date",
+        "Amount"
+      ]
+    },
+    "cash_gl.csv": {
+      "rows": 4,
+      "columns": [
+        "Row_ID",
+        "Bank_Account",
+        "Currency",
+        "Date",
+        "Amount"
+      ]
+    },
+    "balances.csv": {
+      "rows": 1,
+      "columns": [
+        "Bank_Account",
+        "Currency",
+        "As_Of_Date",
+        "Bank_Balance",
+        "GL_Balance",
+        "Bank_Adjustment",
+        "Adjustment_Reference"
+      ]
+    },
+    "opening.csv": {
+      "rows": 3,
+      "columns": [
+        "Item_ID",
+        "Opening_Quantity"
+      ]
+    },
+    "movements.csv": {
+      "rows": 4,
+      "columns": [
+        "Item_ID",
+        "Date",
+        "Quantity_In",
+        "Quantity_Out"
+      ]
+    },
+    "lot_snapshot.csv": {
+      "rows": 3,
+      "columns": [
+        "Item_ID",
+        "Lot_ID",
+        "Receipt_Date",
+        "Snapshot_Date",
+        "Remaining_Quantity"
+      ]
+    },
+    "cleansing_raw.csv": {
+      "rows": 4,
+      "columns": [
+        "전표번호",
+        "계정번호",
+        "거래일자",
+        "금액",
+        "입력자"
+      ]
+    },
+    "cleansing_mapping.csv": {
+      "rows": 5,
+      "columns": [
+        "Source_Field",
+        "Target_Field"
+      ]
+    }
+  }
+}

@@ -1,0 +1,6 @@
+﻿Business_Unit_Code,GL_Account_Number,Metric_Group,Sign_Multiplier
+DEMO:HQ,1000,current_assets,1
+DEMO:HQ,1500,noncurrent_assets,1
+DEMO:HQ,2000,current_liabilities,-1
+DEMO:HQ,2500,noncurrent_liabilities,-1
+DEMO:HQ,3000,equity,-1

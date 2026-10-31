@@ -1,0 +1,6 @@
+﻿,,,,,Type,Date,Num,Name,Memo,Split,Amount,Balance
+DEMO Cash,,,,,,,,,,,,
+,,,,,Deposit,2026-10-15,0001,DEMO Customer,Synthetic only,DEMO Sales,5000,5000
+Total Cash,,,,,,,,,,,5000,5000
+DEMO Sales,,,,,,,,,,,,
+,,,,,Invoice,2026-10-15,0001,DEMO Customer,,,-5000,-5000

@@ -1,0 +1,3 @@
+﻿Request_ID,Response_Status,Reply_As_Of_Date,Confirmed_Balance,Evidence_Reference,Interest_Rate,Maturity_Date,Collateral,Guarantees,Restrictions,Other_Arrangements,Business_Unit_Code,Institution_ID,Account_ID,Item_Type,Currency
+BANK1,confirmed,20261031,10000,SYNTHETIC_BANK_REPLY_1,1%,20271031,없음,없음,없음,없음,DEMO:HQ,DEMO_BANK,DEMO_ACCOUNT_1,deposit,KRW
+BANK2,confirmed,20261031,11000,SYNTHETIC_BANK_REPLY_2,5%,20271031,합성 건물 담보,없음,없음,없음,DEMO:HQ,DEMO_BANK,DEMO_ACCOUNT_2,loan,KRW
