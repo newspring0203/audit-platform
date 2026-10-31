@@ -2,15 +2,15 @@
 
 **회계 자료를 업로드하고, 분석 결과에서 원본과 검토 조서까지 확인하는 웹 워크스페이스입니다.**
 
-HTML · CSS · JavaScript로 구현하고 FastAPI에 연결했습니다.
+**Audit Analytics** 화면을 HTML · CSS · JavaScript로 구현하고 FastAPI에 연결했습니다.
 
 [**웹에서 사용하기 ↗**](https://audit-platform-ow3x.onrender.com/) · [Backend](../backend/README.md) · [화면 설계](../docs/review_workspace.md)
 
 ## 구현한 기능
 
-- **자료 준비** — SAP·QuickBooks 전처리, 사용자별 GL 분할, 데이터 클렌징
-- **감사 분석** — 전표 검사, 분석적 검토, 자금 대사, 재고 분석, 조회 회신 비교
 - **회사 이해** — 회사·기간별 OpenDART 공시 조회
+- **데이터 처리** — SAP·QuickBooks 전처리, 사용자별 GL 분할, 데이터 클렌징
+- **감사 데이터 분석** — 총계정원장 테스트, 분석적 검토, 자금 대사, 재고 분석, 조회 회신 비교
 - **결과 검토** — 결과표, 원본 행 추적, 검토 메모와 조서 다운로드
 
 ## 사용 흐름
