@@ -1,0 +1,2 @@
+﻿Review_Record_ID,code,field,message,source_table,source_file,source_row,source_field,value,journal_id,severity,suggested_review
+ceac2a3ce93004596a687d9b,CONFIRMATION_DATE_SCOPE,As_Of_Date,장부·요청 정리표는 분석 기준일과 동일한 자료를 제출한다.,ledger,ledger,,As_Of_Date,,,error,원본 값과 검사 조건을 확인하고 재실행하세요.

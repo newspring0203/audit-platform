@@ -1,75 +1,92 @@
 # Audit Platform
 
-**회계·재무 데이터 기반 감사지원 플랫폼입니다.**
+**회계·재무 데이터 분석부터 원본 확인, 검토 기록과 조서 다운로드까지 연결한 감사지원 플랫폼입니다.**
 
-회사 이해부터 데이터 처리, 감사 데이터 분석과 검토 조서 생성까지 연결했습니다.
+[웹에서 사용하기 ↗](https://audit-platform-ow3x.onrender.com/) · [시연 영상 ↗](https://www.youtube.com/watch?v=LWEW0ocwOVs) · [산출물 살펴보기](docs/portfolio/output-guide.md)
 
-[**웹에서 사용하기 ↗**](https://audit-platform-ow3x.onrender.com/) · [Frontend](frontend/README.md) · [Backend](backend/README.md)
+## 시연 영상
 
-## 프로젝트 소개
+[▶ Audit Platform 시연 영상 보기](https://www.youtube.com/watch?v=LWEW0ocwOVs)
 
-회계 자료를 분석한 뒤 결과의 근거를 확인하고 검토 내용을 정리하는 과정을 하나의 작업 공간으로 구현했습니다. AICPA ADS의 데이터 구조와 공개 Python 예제를 학습하고, 분석 함수를 FastAPI 기반 웹 서비스에 연결했습니다.
+**원활한 시청을 위해 화질을 1080p로 설정해 주세요.**
 
-사용자가 직접 파일과 분석 조건을 입력하고, 분석 결과에서 원본 행을 확인한 뒤 검토 기록과 조서를 내려받을 수 있습니다.
+자료 업로드 → 분석 실행 → 원본 확인 → 검토 기록 → 조서 다운로드를 시연합니다.
 
 ## 주요 기능
 
-| 영역      | 기능                                                         |
-| --------- | ------------------------------------------------------------ |
-| 회사 이해 | OpenDART 공시 조회와 원문 확인 |
-| 데이터 처리 | SAP·QuickBooks 전처리, 입력 사용자별 GL 분할, 데이터 클렌징 |
-| 감사 데이터 분석 | 총계정원장 테스트, 분석적 검토, 자금 대사, 재고 분석, 조회 회신 비교 |
-| 결과 검토 | 원본 행 추적, 자료 버전 관리, 검토 기록, 조서 다운로드       |
+| 영역 | 기능 |
+|---|---|
+| 회사 이해 | OpenDART 공시 조회·주제별 검토 문단 추출 |
+| 데이터 처리 | SAP·QuickBooks 전처리, 사용자별 GL 분할, 데이터 클렌징 |
+| 감사 데이터 분석 | 총계정원장 테스트(JET), 분석적 검토, 조회 회신 비교, 자금 대사, 재고 분석 |
+| 결과 검토 | 원본 행 추적, 자료 버전 비교, 증빙 참조·검토 기록, 조서 다운로드 |
 
 ## 대표 구현
 
-### SAP 자료를 분석 가능한 GL·TB로 변환
+### SAP 자료를 GL·TB로 변환하고 대사
 
-BSEG 전표 상세와 BKPF 전표 헤더를 연결해 총계정원장을 생성하고, GLT0 잔액 자료를 시산표로 변환합니다. 전표의 차대 일치와 계정·기간별 GL–TB 움직임을 함께 확인합니다.
+BSEG 전표 상세와 BKPF 헤더를 연결해 GL을 생성하고, GLT0를 기간별 TB로 변환합니다. 키 중복·헤더 누락·결합 전후 행 수를 검사하고 전표 차대와 GL–TB 거래금액을 비교합니다.
 
-[변환 코드](src/audit_data_lab/sap.py) · [검증 코드](tests/test_sap_web.py)
+[변환 코드](src/audit_data_lab/sap.py) · [필드 매핑과 검증](docs/sap_ads_mapping.md)
 
-### 중복 대사 후보를 검토 대상으로 분리
+### 선정 이유와 예외를 함께 보여주는 분석
 
-계좌·통화·금액·일자를 기준으로 은행과 장부의 거래를 비교합니다. 양쪽에서 후보가 하나인 경우에만 자동 연결하고, 같은 금액의 후보가 여러 개면 검토 대상으로 남깁니다.
+JET는 규칙별 선정 이유를 전표 단위 검토 목록으로 묶습니다. 자금 대사는 은행·장부 양쪽에서 유일한 후보만 연결하고, 중복 후보와 미대사는 후속 확인 대상으로 남깁니다. 입력 오류와 검사 미실행 사유도 결과에 기록합니다.
 
-[자금 대사 코드](src/audit_data_lab/cash.py) · [검증 코드](tests/test_deeper_analytics.py)
+[JET 코드](src/audit_data_lab/jet.py) · [자금 대사 코드](src/audit_data_lab/cash.py) · [분석 기능 상세](docs/deeper_analytics.md)
 
-### 분석 결과에서 원본과 검토 기록까지 연결
+### 결과에서 원본과 검토 기록까지 연결
 
-결과 행에서 입력 자료의 원본 행과 적용 조건을 확인할 수 있습니다. 검토 메모와 참조를 기록하고, 분석 조서와 최신 검토 이력을 각각 다운로드할 수 있습니다.
+결과 행에서 사용한 원본 자료와 계산 조건을 확인하고, 증빙 참조·검토 의견을 기록합니다. 분석 시점 조서와 이후 검토 이력을 각각 다운로드할 수 있습니다.
 
-[원본 추적 코드](src/audit_data_lab/traceability.py) · [검토 화면 설계](docs/review_workspace.md)
+[원본 추적 코드](src/audit_data_lab/traceability.py) · [검토 공간 설계](docs/review_workspace.md)
 
-## 사용 방법
+## 산출물
 
-**기능 선택 → 분석 조건 설정 → 자료 업로드 → 분석 실행 → 결과 검토 → 조서 다운로드**
+기능별 입력·출력 파일과 시트 구조·주요 컬럼·실행 결과를 정리했습니다.
 
-배포 사이트에서 **데모 시작**을 누르면 방문자 전용 작업 공간에 연결됩니다. KYC 공시 조회에는 본인이 발급받은 OpenDART 인증키를 입력합니다.
+| 먼저 볼 산출물 | 확인할 내용 |
+|---|---|
+| [KYC 공시](docs/portfolio/artifacts/00-kyc/output-guide.md) | 공시 출처와 검토 문단 연결 |
+| [QuickBooks 전처리](docs/portfolio/artifacts/02-quickbooks/output-guide.md) | 보고서에서 거래 표로 바뀌는 과정 |
+| [총계정원장 테스트](docs/portfolio/artifacts/07-jet/output-guide.md) | 규칙별 선정 사유와 전표 검토 목록 |
+| [분석적 검토](docs/portfolio/artifacts/08-analytical-review/output-guide.md) | 전기·당기 비교와 재무비율 |
+| [자금 대사](docs/portfolio/artifacts/09-cash-proofing/output-guide.md) | 연결 후보·일치·미대사 구분 |
 
-방문자별 작업은 분리되며, 작업 자료는 생성 후 기본 1시간에 만료됩니다. 필요한 결과는 다운로드해 보관합니다.
+[전체 11개 기능의 산출물·파일 다운로드 →](docs/portfolio/output-guide.md)
 
 ## 기술 구성
 
-- **Frontend** — HTML, CSS, JavaScript
-- **Backend** — Python, FastAPI, pandas, SQLite
-- **배포·검증** — Docker, Render, GitHub Actions
+| 구분 | 사용 기술 |
+|---|---|
+| Frontend | HTML · CSS · JavaScript |
+| Backend·분석 | Python · FastAPI · pandas · SQLite |
+| 배포·검증 | Docker · Render · GitHub Actions |
 
-로컬의 개발용 토큰 인증을 배포 환경의 방문자 쿠키 세션으로 확장했습니다. 파일 검증·작업 소유권 검사·만료 자료 정리를 적용하고, OpenDART 키는 해당 실행에서만 일시적으로 처리합니다.
+Python 분석 함수를 웹 서비스에 연결하고 작업별 자료 관리·파일 검증·사용자 소유권 확인·실행 시간 제한을 적용했습니다.
 
-[로컬 실행과 화면 구성](frontend/README.md) · [서버 구조와 키 처리](backend/README.md) · [배포 검증 기록](docs/deployment-verification.json)
+[Frontend 구성·실행](frontend/README.md) · [Backend 구조·실행](backend/README.md) · [배포·검증 기록](docs/deployment.md)
 
-## 학습과 개발
+## 설계·학습 문서
 
-AICPA ADS 명세와 공개 Python 예제를 바탕으로 SAP·QuickBooks 자료 처리 흐름을 학습했습니다. 이를 토대로 입력 검증, 웹 분석 실행, 원본 추적, 검토 기록과 조회 회신 비교 기능을 구현·확장했습니다.
+| 주제 | 문서 |
+|---|---|
+| 기능·구조 | [기능별 구현](docs/platform_features.md) · [아키텍처](docs/architecture.md) |
+| 감사 관점 | [기준과 구현 상태](docs/audit_standards.md) · [로그 대사 기준](docs/log_basis_policy.md) · [조회 회신 검토](docs/confirmation_review.md) |
+| 데이터 처리 | [SAP 매핑](docs/sap_ads_mapping.md) · [QuickBooks](docs/quickbooks_preprocessing.md) · [사용자별 분할](docs/gl_user_split.md) |
+| 검토·조서 | [검토 공간](docs/review_workspace.md) · [검토·조서 흐름](docs/page_review_flow.md) |
+| 개발·학습 | [ADS 학습과 적용](docs/portfolio/ads-learning.md) · [Python 리팩터링](docs/python_backend_refactor.md) · [테스트 안내](tests/README.md) |
 
-개발 과정에서 생성형 AI의 코드 작성·수정 지원을 활용했으며, 처리 조건과 결과를 테스트와 실행 사례로 확인했습니다.
+## 공식 참고문서
 
-[AICPA ADS 학습 정리](docs/portfolio/ads-learning.md) · [참고한 공개 Python 예제](https://github.com/AICPA-AuditDataAnalytics2018/ADS---Python-Example-)
+**AICPA의 Audit Data Standards(ADS) — General Ledger Standard를 데이터 구조 설계의 주요 참고 기준으로 활용했습니다.** GL·TB·계정과목표·전표 출처의 필드와 의미를 학습하고, 변환·검증 로직에 적용했습니다.
 
-## 향후 확장
+| 발행기관 | 공식 문서 | 프로젝트에서 참고한 내용 |
+|---|---|---|
+| **AICPA** | [**Audit Data Standards — General Ledger Standard (July 2015)**](https://www.aicpa-cima.com/resources/download/general-ledger-standard-audit-data-standards) | GL·TB·계정과목표·출처 목록의 데이터 구조와 필드 정의 |
+| **PCAOB** | [**AS 1105 — Audit Evidence**](https://pcaobus.org/oversight/standards/auditing-standards/details/AS1105) | 감사증거의 관련성·신뢰성, 회사 제공 정보의 정확성·완전성 평가 관점 |
+| **AICPA** | [**Audit Evidence — SAS No. 142 At a Glance**](https://www.aicpa-cima.com/resources/article/audit-evidence) | 감사증거 평가에 관한 공식 개요 자료 |
 
-- 업로드 미리보기와 컬럼 매핑 안내 개선
-- Keycloak 기반 로그인과 역할별 검토·승인 흐름 추가
-- 데이터베이스·파일 저장소·작업 큐 분리
-- Git provider 연결을 통한 CI 통과 후 자동 배포 구성
+[ADS 4개 데이터셋·69개 필드 학습 정리](docs/portfolio/ads-learning.md) · [기준별 적용 범위와 구현 상태](docs/audit_standards.md)
+
+학습에는 [공개 Python 예제](https://github.com/AICPA-AuditDataAnalytics2018/ADS---Python-Example-)도 참고했으며, 입력 검증·웹 실행·원본 추적·검토 기록으로 확장했습니다. 개발 과정에서 생성형 AI의 코드 작성·수정 지원을 활용했습니다.

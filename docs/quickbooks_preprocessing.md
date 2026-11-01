@@ -1,13 +1,35 @@
 # QuickBooks 보고서 평탄화
 
-기존 `/Users/saebom/ADS/samples/quickbooksGLtoDatabase.py`는 수정하지 않았습니다. 신규 함수 `reshape_quickbooks_report`는 예제와 같은 13열 보고서를 거래 표로 펼칩니다. 원본의 첫 행 6~13열은 정확히 Type, Date, Num, Name, Memo, Split, Amount, Balance여야 합니다. 앞 5열은 계정 표제입니다. 첫 시트만 읽습니다. 제목 행·지역별 열명·다른 QuickBooks 내보내기는 현재 지원하지 않으며 형식 오류로 보고합니다.
+`reshape_quickbooks_report`는 계정 제목·거래·합계를 분리하고 거래마다 계정 정보를 붙입니다.
 
-웹에서 QuickBooks 보고서 전처리를 선택하고 quickbooks 슬롯에 Excel 또는 동일한 원본 구조의 CSV를 업로드합니다. 조건 date_format은 %Y-%m-%d(기본), %m/%d/%Y, %d/%m/%Y, %Y%m%d 중 하나입니다. Excel 날짜 셀과 명시한 문자열 형식을 처리합니다. 숫자 날짜 일련번호를 자동 추정하지 않습니다.
+## 입력과 실행
 
-ZIP의 review/analysis/modified_gl.csv는 펼친 거래입니다. row_dispositions.csv는 모든 원본 행의 처리 구분, review_rows.csv와 module_issues.csv는 미분류·거부 행과 원인입니다. 첫 논리 원본 레코드는 1이며 헤더·표제·합계도 원본 추적에 남깁니다. 금액은 쉼표 천 단위·괄호 음수·소수 둘째 자리까지 명시적으로 해석합니다. 통화 기호를 제거하거나 통화를 추정하지 않습니다.
+| 항목 | 지원 형식 |
+|---|---|
+| 웹 입력 슬롯 | `quickbooks` |
+| 파일 | XLSX 첫 시트 또는 같은 구조의 CSV |
+| 열 구성 | 계정 표시 5열 + 거래 8열, 총 13열 |
+| 거래 헤더 | Type, Date, Num, Name, Memo, Split, Amount, Balance |
+| 문자열 날짜 | `%Y-%m-%d`, `%m/%d/%Y`, `%d/%m/%Y`, `%Y%m%d` |
+| 금액 | 쉼표 천 단위·괄호 음수·소수 둘째 자리 |
 
-변환에 문제가 있으면 conversion_status=incomplete_review_required로 표시하며, modified_gl은 부분 결과일 수 있습니다. CSV에도 Conversion_Status와 ADS_Status를 표시합니다. 합계·기초잔액 행은 거래로 중복 집계하지 않지만 해당 금액의 산술 대사까지 수행한 것은 아닙니다. 파일명 대소문자는 새 엔진의 modified_gl.csv를 따릅니다.
+Excel 날짜 셀과 지정 형식의 문자열을 해석합니다. 숫자 일련번호·통화 기호·다른 레이아웃은 형식 검토 대상으로 반환합니다.
 
-**ADS GL 변환이 아닙니다.** Num을 유일 전표 키로 추정하지 않고 계정 코드·통화·입력일·입력 사용자·회계기간을 만들지 않습니다. 해당 정보와 원본 범위를 확인한 별도 ADS 매핑이 있어야 기존 JET 및 사용자별 분할 입력으로 사용할 수 있습니다. 이 기능을 SAP 변환과 자동 연결하지 않습니다.
+## 출력
 
-학습 노트북: notebooks/reshape_quickbooks_report.ipynb. 합성 데이터로만 검증하며 실제 QuickBooks 원본 예제 파일은 현재 프로젝트에 없습니다. 웹 자료는 기존 사용자 격리·권한·TTL을 따르고 노트북 outputs는 로컬 학습용입니다.
+| 표 | 역할 |
+|---|---|
+| `modified_gl` | 계정명을 연결한 거래 |
+| `row_dispositions` | 헤더·계정 제목·거래·합계 등 원본 행 분류 |
+| `review_rows` | 미분류·거부 행 원본 |
+| `module_issues` | 입력 오류와 확인 사항 |
+
+`QuickBooks_Source_Row`는 거래 원본, `Account_Source_Row`는 계정 제목 원본 위치입니다. 합계·기초잔액은 거래와 분리해 처리 이력에 보존합니다.
+
+## 함수 설계
+
+계정 제목을 다음 거래행에 전달하고 모호한 경계에서는 연결을 해제합니다. 거래별 날짜·금액·계정·유형 검사를 통과한 행을 출력하며 거부 행은 별도 검토 목록에 남깁니다.
+
+부분 변환은 `incomplete_review_required`, ADS 매핑 전 상태는 `not_converted`로 기록합니다. 후속 JET·사용자 분할에는 계정코드·통화·입력일·입력자·회계기간과 전표 식별자를 확인한 매핑 자료를 사용합니다.
+
+[구현 코드](../src/audit_data_lab/quickbooks.py) · [테스트](../tests/test_quickbooks.py) · [산출물](portfolio/artifacts/02-quickbooks/output-guide.md)

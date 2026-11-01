@@ -1,0 +1,4 @@
+﻿Review_Record_ID,code,field,message,source_table,source_file,source_row,source_field,value,journal_id,severity,suggested_review
+04d8e3250e1ce8d18b49fb67,EMPTY_SCOPE,*,선택 범위에 BSEG 데이터가 없습니다.,BSEG,BSEG_0001_Accounting Document Segment.xlsx,,,,,error,원본 값과 검사 조건을 확인하고 재실행하세요.
+9af03d9401ccd0b0dfbf0a63,EMPTY_SCOPE,*,선택 범위에 BKPF 데이터가 없습니다.,BKPF,SAP_BKPF_전표헤더.txt,,,,,error,원본 값과 검사 조건을 확인하고 재실행하세요.
+3a1834c36010c37fa4a0071d,EMPTY_SCOPE,*,선택 범위에 GLT0 데이터가 없습니다.,GLT0,GLT0_0001_GL account master record transaction figures.xlsx,,,,,error,원본 값과 검사 조건을 확인하고 재실행하세요.

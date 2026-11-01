@@ -1,0 +1,153 @@
+{
+  "snapshot_date": "2026-11-01",
+  "policy": "제공 파일 바이트 그대로 복사; 분석 재실행 없음; 공개 공시·학습·합성 자료의 관찰용 입력·출력 사본",
+  "files": [
+    {
+      "module": 0,
+      "path": "../../data/demo/portfolio_artifacts/00-kyc/output.xlsx",
+      "original_name": "0. output.xlsx",
+      "sha256": "855627deb5a96617ed8d9e643a2cb4303174bbba4ece4f23550e2d56f3e1d451",
+      "bytes": 18307
+    },
+    {
+      "module": 1,
+      "path": "../../data/demo/portfolio_artifacts/01-sap/input.xlsx",
+      "original_name": "1. input.xlsx",
+      "sha256": "89d0a062063be62e8c5900620c2ae15883ac30db35dd42515f9912c2f9ccbc98",
+      "bytes": 12652352
+    },
+    {
+      "module": 1,
+      "path": "../../data/demo/portfolio_artifacts/01-sap/output.csv",
+      "original_name": "1. output.csv",
+      "sha256": "5a872d1600902d602b6431bf04f0cbcead603c186869d1d99440582581ff3e89",
+      "bytes": 763
+    },
+    {
+      "module": 2,
+      "path": "../../data/demo/portfolio_artifacts/02-quickbooks/input.csv",
+      "original_name": "2. input.csv",
+      "sha256": "66e25b9609de4b1b9845daaac06013f225a147f1c0b7ccb532d48d459ab65e8e",
+      "bytes": 239
+    },
+    {
+      "module": 2,
+      "path": "../../data/demo/portfolio_artifacts/02-quickbooks/output.xlsx",
+      "original_name": "2. output.xlsx",
+      "sha256": "69738e8870c01ffbf3ca31c0fc001618d49f08c8a86beb8a1f16ec7346087683",
+      "bytes": 11087
+    },
+    {
+      "module": 3,
+      "path": "../../data/demo/portfolio_artifacts/03-gl-user-split/input.csv",
+      "original_name": "3. input.csv",
+      "sha256": "6173a9f7188749029c12b056b493cb92a58de8929fa4717963b757a8cbafc98a",
+      "bytes": 3634792
+    },
+    {
+      "module": 3,
+      "path": "../../data/demo/portfolio_artifacts/03-gl-user-split/output.xlsx",
+      "original_name": "3. output.xlsx",
+      "sha256": "a819aa60b9b5c99ec0450ad7fb529d18703910adb4777767c6c7a7f78417c5e9",
+      "bytes": 3154586
+    },
+    {
+      "module": 4,
+      "path": "../../data/demo/portfolio_artifacts/04-data-cleansing/input.xlsx",
+      "original_name": "4. input.xlsx",
+      "sha256": "4acef1734b9efdd920b83ddd751de45e35546ffe482fd74583ec8679a69ef709",
+      "bytes": 10183
+    },
+    {
+      "module": 4,
+      "path": "../../data/demo/portfolio_artifacts/04-data-cleansing/output.xlsx",
+      "original_name": "4. output.xlsx",
+      "sha256": "c6304e2420d6970b61d099f4d950238db3b221c048564f841d14a54499de2ece",
+      "bytes": 14482
+    },
+    {
+      "module": 5,
+      "path": "../../data/demo/portfolio_artifacts/05-ar-confirmations/input.xlsx",
+      "original_name": "5. input.xlsx",
+      "sha256": "cd8a2bda0309756379da73afa7db07a2509d5ca27cd119483bfe0f15eb96ed51",
+      "bytes": 11508
+    },
+    {
+      "module": 5,
+      "path": "../../data/demo/portfolio_artifacts/05-ar-confirmations/output.csv",
+      "original_name": "5. output.csv",
+      "sha256": "7eb515116c3975692d7b377c9bb62b893fd1f1613ec3569769de9ee7770eb446",
+      "bytes": 371
+    },
+    {
+      "module": 6,
+      "path": "../../data/demo/portfolio_artifacts/06-bank-confirmations/input.xlsx",
+      "original_name": "6. input.xlsx",
+      "sha256": "baa4bd1eace2a0ab22243dd2673baa4a48bd08a054546cac82901aefc006a09a",
+      "bytes": 11797
+    },
+    {
+      "module": 6,
+      "path": "../../data/demo/portfolio_artifacts/06-bank-confirmations/output.csv",
+      "original_name": "6. output.csv",
+      "sha256": "12e0291b76d03e164747b5b3eb591e7e6d5fbb6aeb6452e7564208e368188f79",
+      "bytes": 371
+    },
+    {
+      "module": 7,
+      "path": "../../data/demo/portfolio_artifacts/07-jet/input.xlsx",
+      "original_name": "7. input.xlsx",
+      "sha256": "255c4b5ad9f8be7f979980e3978e28c3cc198768c63ec82611ec6e93aa65b44f",
+      "bytes": 10938
+    },
+    {
+      "module": 7,
+      "path": "../../data/demo/portfolio_artifacts/07-jet/output.xlsx",
+      "original_name": "7. output.xlsx",
+      "sha256": "dc3c9c810588dc75ab1c4fd2dd6c75ad08c6c04580456b724a6fca68d5314726",
+      "bytes": 14984
+    },
+    {
+      "module": 8,
+      "path": "../../data/demo/portfolio_artifacts/08-analytical-review/input.xlsx",
+      "original_name": "8. input.xlsx",
+      "sha256": "386afe51dc97441dc8ba1ef1ebe42594701530f4be8626c5f862139b896b176d",
+      "bytes": 12170
+    },
+    {
+      "module": 8,
+      "path": "../../data/demo/portfolio_artifacts/08-analytical-review/output.xlsx",
+      "original_name": "8. output.xlsx",
+      "sha256": "325d531ae428eb408e87bfeed556674ac80f29d6486f196c2c26dcfec9f4d7c5",
+      "bytes": 17184
+    },
+    {
+      "module": 9,
+      "path": "../../data/demo/portfolio_artifacts/09-cash-proofing/input.xlsx",
+      "original_name": "9. input.xlsx",
+      "sha256": "21eb2c1e9dd9dc216c5dd3d42ffe93e7c99c5e97e078ed1bb66296df5116ce15",
+      "bytes": 11151
+    },
+    {
+      "module": 9,
+      "path": "../../data/demo/portfolio_artifacts/09-cash-proofing/output.xlsx",
+      "original_name": "9. output.xlsx",
+      "sha256": "fcc1ec3bbed1fe4a70eef33e67a32d1601088d379521fdf4bb216ab76ddcdc70",
+      "bytes": 15700
+    },
+    {
+      "module": 10,
+      "path": "../../data/demo/portfolio_artifacts/10-inventory/input.xlsx",
+      "original_name": "10. input.xlsx",
+      "sha256": "54888d5b6ef00e0d299bdeb1797f56bab73cb29c4110b9362d60d68f93c3f2e7",
+      "bytes": 10975
+    },
+    {
+      "module": 10,
+      "path": "../../data/demo/portfolio_artifacts/10-inventory/output.xlsx",
+      "original_name": "10. output.xlsx",
+      "sha256": "f045ecacca9ae26e643cc3899a4b1a525c7760c0f7465f230421f69e4cad411e",
+      "bytes": 15110
+    }
+  ]
+}
