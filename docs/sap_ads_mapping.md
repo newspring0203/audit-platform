@@ -31,3 +31,11 @@
 ## 결과 해석
 
 생성 파일에는 draft를 표시합니다. 검증 차이가 있어도 숨기지 않고 outputs/validation에 저장합니다. 계정과목표·출처 목록, 원본 추출 범위, 기능통화 및 감사 단위 확인이 필요합니다. 현금·매출 등 계정 의미는 원본 계정과목표 없이 추정하지 않습니다.
+
+## 결합키와 원본 추적
+
+현재 BSEG→BKPF 결합키는 `BUKRS + GJAHR + BELNR`이며 상세 식별에는 BUZEI가 추가됩니다. MANDT는 결합키에 포함되지 않아 여러 클라이언트가 섞이지 않았는지 추출 범위를 확인해야 합니다. 헤더·상세 중복과 헤더 미연결을 검사하고 `validate='many_to_one'` 및 결합 전후 행 수로 중복 증식을 방지합니다.
+
+BKPF에서 업무상 선택하는 필드는 연결키 3개와 BKTXT·BLART·BUDAT·BLDAT·CPUDT·CPUTM·MONAT·USNAM·HWAER의 총 12개입니다. `__source_row`는 프로그램이 추가하는 추적 필드입니다. 원본의 전체 SAP 필드를 모두 출력하는 변환이 아닙니다.
+
+출력 `sap_lineage`는 GL 전표·행과 BSEG/BKPF 원본 행을 연결합니다. `gl_tb_reconciliation`은 계정·사업단위·연도·기간별 GL 순변동과 TB 거래금액을 비교합니다. 두 자료가 일치해도 동일하게 누락된 범위를 발견했다는 뜻은 아닙니다. [실제 코드](../src/audit_data_lab/sap.py)
