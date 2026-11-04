@@ -1,4 +1,4 @@
-# 분석 기능 확장 — 2026-10-31
+# 분석 기능 확장
 
 개발용 Python 엔진과 웹 API에 다음 기능을 연결했습니다. 검토 후보·선정 사유·검사 수행 상태를 제공합니다.
 
@@ -34,10 +34,6 @@ TB: Business_Unit_Code, GL_Account_Number, Fiscal_Year, Period, Amount_Currency,
 로트: Item_ID, Lot_ID, Receipt_Date, Snapshot_Date, Remaining_Quantity.
 매핑: Target_Field, Source_Field.
 
-## 아직 남은 작업
-
-입력·오류·다운로드·원본 조회·검토 화면은 연결되어 있습니다. 기능별 전용 Excel 레이아웃·심화 차트, 실제 API 실행별 검증과 다양한 SAP 원본 검증은 별도 과제입니다. 매출채권 조회 회신 정리표 비교도 공통 검토 흐름에 연결했습니다.
-
 ## 설정·계산 단위
 
 - JET의 화면 라벨은 저빈도 최대 행 수지만 실제 `nunique(Journal_ID)` 기준입니다. 중복 규칙을 제거한 전표별 규칙 수로 검토 목록을 정렬합니다.
@@ -46,4 +42,4 @@ TB: Business_Unit_Code, GL_Account_Number, Fiscal_Year, Period, Amount_Currency,
 - 재고는 모든 수불 품목의 명시적 기초가 필요하고 기말 음수와 중간 음수를 별도로 계산합니다. 같은 날의 수불은 원본 행 순서로 계산합니다.
 - 조회 회신 차이는 장부−회신이며 같은 기준일의 confirmed 회신만 비교합니다. 허용차이 이내라도 비영 차이는 검토 대상으로 남깁니다.
 
-자세한 함수와 오류 처리는 [README](../README.md#주요-기능), [로그 정책](log_basis_policy.md), [조회 회신](confirmation_review.md)을 참고합니다.
+자세한 함수와 오류 처리는 [README](../README.md#주요-기능), [로그 정책](log_basis_policy.md), [조회 회신](confirmation_review.md)을 참고 부탁드립니다.
